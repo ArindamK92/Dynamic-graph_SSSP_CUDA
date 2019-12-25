@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <iostream>
+#include<vector>
+#include "GraphStructure.h"
+
+
+//Edges are sorted
+//create_Network (creates ADJ network)
+
+/**** Storing Network in Adjacency List ******/
+void create_Network(vector<Edge>* b, int bf_size, A_Network* X, int Ns)
+{
+	if (bf_size > 0) { cout << "ESSENS:ERROR:: No Buffers in Adjacency List \n"; }
+	//Initialize
+	ADJ_Bundle AList; //create current Adj_Bundle
+	int_double colvals;
+	int current_node = -1;
+
+
+	//Read Through the list of edges	 
+	for (int i = 0; i < b->size(); i++)
+	{
+
+
+		//Read each entry of edgelist
+		int node1 = b->at(i).node1;
+		int node2 = b->at(i).node2;
+		double edge_wt = b->at(i).edge_wt;
+
+		//Initailize and Add Row
+		if (current_node != node1)
+		{
+			if (current_node > -1) //Update network after each row
+			{
+				//Update Rows
+				X->push_back(AList); //Add row and neighbors to network;
+				AList.ListW.clear(); //Clear List of Edges;
+
+			} //end of if
+
+		//Add missing vertices if necessary
+			current_node++;
+			while (current_node != node1)
+			{
+				AList.Row = current_node;
+				X->push_back(AList); //Add row and neighbors to network;
+				AList.ListW.clear(); //Clear List of Edges;
+				current_node++;
+			}
+
+			//Set to next node
+			current_node = node1;
+			AList.Row = current_node;
+		} //end of if
+
+		//Add Columns corresponding to the rows
+		colvals.first = node2;
+		colvals.second = edge_wt;
+		AList.ListW.push_back(colvals);
+
+	} //end of for
+
+	//Clear edgelist
+	b->clear();
+
+	//Add the final buffers
+	//No need of buffer space becuase link can be easily appended
+
+	//Update Rows
+	X->push_back(AList); //Add row and neighbors to network;
+	AList.ListW.clear(); //Clear AList;
+
+	//Add remaining nodes that are only dests
+	if (!(Ns == -1))
+	{
+		current_node++;
+		while (current_node != Ns)
+		{
+			AList.Row = current_node;
+			X->push_back(AList); //Add row and neighbors to network;
+			AList.ListW.clear(); //Clear List of Edges;
+			current_node++;
+		}
+	}
+
+	return;
+
+}
+/***** End of Function **********/
