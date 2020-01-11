@@ -1,46 +1,51 @@
 ﻿  Compiling CUDA source file main1.cu...
   
   C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\main1.cu.obj "C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\main1.cu" 
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(141): warning : variable "edge_wt" was declared but never referenced
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(146): warning : variable "edge_wt" was declared but never referenced
   
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(155): warning : variable "current_node" was declared but never referenced
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(160): warning : variable "current_node" was declared but never referenced
   
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(156): warning : variable "i" was declared but never referenced
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(161): warning : variable "i" was declared but never referenced
   
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(293): warning : variable "i" was declared but never referenced
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(298): warning : variable "i" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(270): warning : variable "result" was set but never used
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(835): warning : variable "result" was set but never used
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning : variable "startx" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning : variable "startx" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning : variable "endx" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning : variable "endx" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning : variable "starty" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning : variable "starty" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning : variable "endy" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning : variable "endy" was declared but never referenced
   
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(213): warning : variable "nodes" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(963): warning : variable "iter" was declared but never referenced
+  
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1083): warning : variable "iter" was declared but never referenced
+  
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(218): warning : variable "nodes" was declared but never referenced
             detected during instantiation of "void readin_network(myNetworkType *, char *, int) [with myNetworkType=A_Network]" 
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(150): here
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(705): here
   
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(223): warning : variable "i" was declared but never referenced
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(228): warning : variable "i" was declared but never referenced
             detected during instantiation of "void readin_network(myNetworkType *, char *, int) [with myNetworkType=A_Network]" 
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(150): here
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(705): here
   
   main1.cu
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(141): warning C4101: 'edge_wt': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(118): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(127): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(171): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(183): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(210): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(306): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning C4101: 'starty': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning C4101: 'endx': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning C4101: 'endy': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(72): warning C4101: 'startx': unreferenced local variable
-C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(213): warning C4101: 'nodes': unreferenced local variable
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(150): note: see reference to function template instantiation 'void readin_network<A_Network>(myNetworkType *,char *,int)' being compiled
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(146): warning C4101: 'edge_wt': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(673): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(682): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(726): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(738): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(769): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(885): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(922): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning C4101: 'starty': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning C4101: 'endx': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning C4101: 'endy': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(628): warning C4101: 'startx': unreferenced local variable
+C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structures.h(218): warning C4101: 'nodes': unreferenced local variable
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(705): note: see reference to function template instantiation 'void readin_network<A_Network>(myNetworkType *,char *,int)' being compiled
           with
           [
               myNetworkType=A_Network
@@ -87,7 +92,7 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/c
               InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
               EqualityComparable=int
           ]
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(306): note: see reference to function template instantiation '__int64 thrust::count<thrust::detail::normal_iterator<thrust::device_ptr<int>>,int>(InputIterator,InputIterator,const EqualityComparable &)' being compiled
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(885): note: see reference to function template instantiation '__int64 thrust::count<thrust::detail::normal_iterator<thrust::device_ptr<int>>,int>(InputIterator,InputIterator,const EqualityComparable &)' being compiled
           with
           [
               InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,

@@ -61,7 +61,12 @@ struct xEdge_cuda {
 	void clear()
 	{}
 };
-
+struct ThreadHelper
+{
+	int src; //source
+	int start; //start points to the starting of adjlist of the node in the full adj list
+	int offset; //it stores the lenght of adjlist upto last node
+};
 /*** Pairs ***/
 typedef pair<int, int> int_int;  /** /typedef pair of integers */
 typedef pair<int, double> int_double; /** /typedef pair of integer and double */
