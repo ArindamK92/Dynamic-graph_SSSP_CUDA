@@ -77,14 +77,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SSSPmain.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="all_structures.h" />
-    <ClInclude Include="create_network.h" />
-    <ClInclude Include="GraphStructure.h" />
-    <ClInclude Include="readin_data.h" />
-    <ClInclude Include="structure_defs.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main1.cu" />
