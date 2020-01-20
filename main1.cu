@@ -1,21 +1,26 @@
+/*extern "C" {} *///it will instruct the compiler to expect C linkage for your C functions, not C++ linkage.
 #include <stdio.h>
-#include <iostream>
+//#include "all_structures.h"
+#include "all_structure_cuda.cuh"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include<vector>
-#include <set>
-#include<queue>
-#include <chrono> 
-#include <thread>
-#include<queue>
-#include<stack>
-#include<list>
-#include "all_structures.h"
+#include <iostream>
 #include <thrust/find.h>
 #include <thrust/device_vector.h>
 #include <thrust/count.h>
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
+
+#include<vector>
+//#include <set>
+//#include<queue>
+#include <chrono> 
+//#include <thread>
+//#include<queue>
+//#include<stack>
+//#include<list>
+
+
 #define THREADS_PER_BLOCK 10 //we can change it
 
 using namespace std;

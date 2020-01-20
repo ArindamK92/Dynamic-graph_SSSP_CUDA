@@ -78,6 +78,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="all_structures.h" />
+    <ClInclude Include="all_structure_cuda.cuh" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main1.cu" />
