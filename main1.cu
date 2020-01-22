@@ -683,10 +683,20 @@ int main(int argc, char* argv[]) {
 		R.push_back(adj_bundle);
 	}
 
+	//use below for direct path
 	/*string file1 = "C:\\Users\\khand\\Desktop\\PhD\\CUDA test\\Test\\test 1\\fullGraph.txt";
 	char* cstr1 = &file1[0];
 	readin_graphU(&R, nodes, cstr1);*/
-	readin_graphU(&R, nodes, argv[1]);
+	
+	//use below code if we use pass file name as argument
+	//readin_graphU(&R, nodes, argv[1]);
+
+
+	//use below code to pass the file name as relative path.
+	//**keep the files in the same folder
+	string file1 = "./fullGraph.txt";
+	char* cstr1 = &file1[0];
+	readin_graphU(&R, nodes, cstr1);
 	
 
 
@@ -728,11 +738,20 @@ int main(int argc, char* argv[]) {
 		X.push_back(adj_bundle);
 	}
 
+	//use below for direct path
 	/*string file2 = "C:\\Users\\khand\\Desktop\\PhD\\CUDA test\\Test\\test 1\\SSSP.txt";
 	char* cstr2 = &file2[0];
 	readin_network(&X, cstr2, -1);*/
-	readin_network(&X, argv[2], -1);
-	
+
+	//use below code if we use pass file name as argument
+	/*readin_network(&X, argv[2], -1);*/
+
+	//use below code to pass the file name as relative path.
+	//**keep the files in the same folder
+	string file2 = "./SSSP.txt";
+	char* cstr2 = &file2[0];
+	readin_network(&X, cstr2, -1);
+
 
 	int* key_X = new int[nodes]; //it stores the node. key is used to find the adj list of a specific node
 	int* colStartPtr_X = new int[nodes + 1]; //we take nodes +1 to store the start ptr of the first row 
@@ -767,16 +786,20 @@ int main(int argc, char* argv[]) {
 	//There will be a list for inserts and a list for delete
 	vector<xEdge> allChange;
 	allChange.clear();
+
 	 /*** Read set of Changed Edges ***/
+	//use below for direct path
 	/*string file3 = "C:\\Users\\khand\\Desktop\\PhD\\CUDA test\\Test\\test 1\\changeEdges.txt";
 	char* cstr3 = &file3[0];
 	readin_changes(cstr3, &allChange);*/
-	readin_changes(argv[3], &allChange);
-	/*for (int i = 0; i < allChange.size(); i++)
-	{
-		cout <<"inst: "<< allChange.at(i).inst << endl;
-		cout << "node1: " << allChange.at(i).theEdge.node1 << " node2: " << allChange.at(i).theEdge.node2 << " weight: " << allChange.at(i).theEdge.edge_wt << endl;
-	}*/
+
+	//use below code if we use pass file name as argument
+	/*readin_changes(argv[3], &allChange);*/
+
+	//use below code to pass the file name as relative path.
+	string file3 = "./changeEdges.txt";
+	char* cstr3 = &file3[0];
+	readin_changes(cstr3, &allChange);
 
 	//new addition
 	xEdge_cuda* allChange_cuda;
@@ -901,7 +924,9 @@ int main(int argc, char* argv[]) {
 			/*thrust::device_ptr<int> affectedPointer_alias(affectedPointer);*/
 			thrust::device_vector<int> affectedPointer_vector(affectedPointer_alias, affectedPointer_alias + nodes); //converting device_ptr to device_vector
 			totalAffectedNode = thrust::count(affectedPointer_vector.begin(), affectedPointer_vector.end(), 1); //count the number of affected node
-			cout << "totalAffectedNode: " << totalAffectedNode<<endl;
+			//test code start
+			/*cout << "totalAffectedNode: " << totalAffectedNode<<endl;*/
+			//test code end
 			affected_nodes = (int*)realloc(affected_nodes, totalAffectedNode * sizeof(int));
 			/*affectedPointer = thrust::raw_pointer_cast(&affectedPointer_vector[0]);*/
 			thrust::copy_if(thrust::host, stencil_c, stencil_c + nodes, affectedPointer, affected_nodes, is_affected());
