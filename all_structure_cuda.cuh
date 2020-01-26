@@ -142,7 +142,8 @@ void readin_graphU(A_Network* X, int nodes, char* myfile)
 	ADJ_Bundle AList; //create current Adj_Bundle
 	X->resize(nodes, AList);
 	int_double colvals;
-	int node1;
+	int_double colvals2;
+	int node1, node2;
 	double edge_wt;
 
 
@@ -182,16 +183,19 @@ void readin_graphU(A_Network* X, int nodes, char* myfile)
 		if (i % 3 == 0)
 		{
 			node1 = (int)inputList.at(i);
+			colvals2.first = node1;
 
 		}
 		else if (i % 3 == 1)
 		{
 			colvals.first = (int)inputList.at(i);
-
+			node2 = colvals.first;
 		}
 		else {
 			colvals.second = inputList.at(i);
+			colvals2.second = inputList.at(i);
 			X->at(node1).ListW.push_back(colvals);
+			X->at(node2).ListW.push_back(colvals2);
 		}
 
 
