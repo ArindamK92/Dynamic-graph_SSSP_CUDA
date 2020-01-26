@@ -413,205 +413,205 @@ __global__ void initializeUpdatedDistOldDist(double* d_UpdatedDist, double* d_Ol
 	}
 }
 
-__global__ void updateNeighbors_old(double* d_UpdatedDist, RT_Vertex* SSSP, int X_size, int* d_mychange, int* d_colStartPtr_X, Colwt2* cuda_adjlist_full_X, double inf, int* change_d, int its, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R)
-{
-	int index = threadIdx.x + blockIdx.x * blockDim.x;
-	if (index < X_size)
-	{
-
-		//If i is updated--update its neighbors as required
-		if (SSSP[index].Update)
-		{
-			//Test code start
-			//printf("\nSSSP: index= %d, Dist= %f, EDGwt=%f, Parent=%d \n", index, SSSP[index].Dist, SSSP[index].EDGwt, SSSP[index].Parent);
-			//Test code end
-
-			d_mychange[index] = 0;
-			int px = SSSP[index].Parent;
-
-			//For its nieghbors in X
-			for (int j = 0; j < d_colStartPtr_X[index+1] - d_colStartPtr_X[index]; j++)
-			{
-				////TEPS:
-				//*te = *te + 1;
-				int myn = cuda_adjlist_full_X[d_colStartPtr_X[index] + j].col;
-				double mywt = cuda_adjlist_full_X[d_colStartPtr_X[index] + j].wt;
-
-				if (mywt < 0) { continue; }
-
-				//Check that the Edge weight matches the parent
-				 //NOTE:using atomic structures can reduce this step
-				if (myn == px)
-				{
-					if (SSSP[index].EDGwt == inf) { continue; }
-				}
-
-				if (myn == px)
-				{
-					double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
-
-					if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist))
-					{
-						/*SSSP[index].EDGwt = mywt;*/ //check. added recently 01-19-20
-						if (d_UpdatedDist[index] >= inf)
-						{
-							d_UpdatedDist[index] = inf;
-						}
-						else
-						{
-							d_UpdatedDist[index] = mydist;
-						}
-
-						d_mychange[index] = 1;
-						change_d[0] = 1;
-					} //end of if
-
-					continue;
-				}//end of if
-
-
-				//Update for Neigbors
-				//If distance INF set all neghbors distance to INF at the first iteration
-				if (d_UpdatedDist[index] >= inf /*&& its == 0*/) //check. added recently 01-19-20
-				{
-					if (SSSP[myn].Parent == index) { //check. if added recently 01-19-20
-						d_UpdatedDist[myn] = inf;
-						/*printf("check1: myn= %d, set to inf", myn);*/ //test
-						SSSP[myn].Update = true;
-						//mychange[i]=true;
-						change_d[0] = 1;
-					}
-
-				}
-				else {
-					//If Distance of myn is larger--make i its parent
-					if (SSSP[myn].EDGwt >= mywt) //check. added recently 01-19-20
-					{
-						if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt)
-						{
-							//printf("came heruu e\n");
-
-							SSSP[myn].Parent = index;
-							SSSP[myn].EDGwt = mywt;
-							d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
-							printf("Check 1C. index: %d", myn);
-							SSSP[myn].Update = true;
-							//mychange[i]=true;
-							change_d[0] = 1;
-						}
-					}
-					else //if SSSP[myn].EDGwt < mywt, means SSSP[myn].EDGwt  already updated to a lower value //check. added recently 01-19-20 //else part is added
-					{
-						if (SSSP[myn].Parent == index && (d_UpdatedDist[myn] > d_UpdatedDist[index] + SSSP[myn].EDGwt))
-						{
-							//printf("came heruu e\n");
-
-							d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
-							printf("Check 1B. index: %d", myn);
-							SSSP[myn].Update = true;
-							//mychange[i]=true;
-							change_d[0] = 1;
-						}
-					}
-				}//end of else
-			}//end of for
-
-			 //++++++++++++++++++++//
-
-			//Check Possible Neighbors in R
-			for (int j = 0; j < colStartPtr_R[index + 1] - colStartPtr_R[index]; j++)
-			{
-				int myn = cuda_adjlist_full_R[colStartPtr_R[index] + j].col;
-				double mywt = cuda_adjlist_full_R[colStartPtr_R[index] + j].wt;
-
-				 //check if edge is deleted
-				if (mywt < 0) { continue; }
-
-				//Check that the Edge weight && Distance matches the parent
-				//NOTE:using atomic structur es can reduce this step
-				if (myn == px)
-				{
-					//printf("hhhXX %d %f\n", myn, mywt);
-					/*if (SSSP[index].EDGwt == inf) { continue; }*/ //check. added recently 01-19-20
-
-					double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
-
-					if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist)) {
-						/*SSSP[index].EDGwt = mywt;*/ //check. added recently. commented on 23-01-2020
-						printf("Check 1A. index: %d dist: %f, edge weight: %f \n", index, mydist, SSSP[index].EDGwt);
-						if (d_UpdatedDist[index] >= inf)
-						{
-							d_UpdatedDist[index] = inf;
-						}
-						else
-						{
-							d_UpdatedDist[index] = mydist;
-							printf("Check 1A. index: %d dist: %f, edge weight: %f \n", index, mydist, SSSP[index].EDGwt);
-						}
-
-						d_mychange[index] = 1;
-						change_d[0] = 1;
-					} //end of if
-					continue;
-				}//end of if
-
-
-				//Update for Possible Neighbors
-				if (d_UpdatedDist[myn] >= inf) { continue; }
-
-				 //Connect disconnected vertices--after first iter
-				if ((d_UpdatedDist[index] >= inf) && (d_UpdatedDist[myn] < inf))
-				{
-
-					if (/*its > 0 && */(SSSP[myn].Parent != index)) //check. added recently 01-19-20
-					{
-						SSSP[index].Parent = myn;
-						SSSP[index].EDGwt = mywt;
-						d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
-						printf("Connecting disconnected vertices");
-					}
-					//SSSP->at(myn).Update=true;
-					d_mychange[index] = 1;
-					change_d[0] = 1;
-				 //   continue;
-				}
-
-				//If Distance of myn is larger--make i its parent
-				if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt)
-				{
-					// printf("came herXXe %d::%d %f %f %f\n", i,myn,UpdatedDist[myn],UpdatedDist[i],mywt);
-					SSSP[myn].Parent = index;
-					SSSP[myn].EDGwt = mywt;
-
-					if (d_UpdatedDist[myn] >= inf)
-					{
-						d_UpdatedDist[myn] = inf;
-					}
-					else
-					{
-						d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
-						printf("Check 1. index: %d", index);
-					}
-
-					SSSP[myn].Update = true;
-					//mychange[i]=true;
-					change_d[0] = 1;
-				}
-
-			}//end of for
-
-			//if no change occured then update is done
-			if (d_mychange[index] != 1)
-			{
-				SSSP[index].Update = false;
-			}
-			else
-			{
-				SSSP[index].Update = true;
-			}
-		}//end of if Updated
-	}//end of for all nodes
-}
+//__global__ void updateNeighbors_old(double* d_UpdatedDist, RT_Vertex* SSSP, int X_size, int* d_mychange, int* d_colStartPtr_X, Colwt2* cuda_adjlist_full_X, double inf, int* change_d, int its, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R)
+//{
+//	int index = threadIdx.x + blockIdx.x * blockDim.x;
+//	if (index < X_size)
+//	{
+//
+//		//If i is updated--update its neighbors as required
+//		if (SSSP[index].Update)
+//		{
+//			//Test code start
+//			//printf("\nSSSP: index= %d, Dist= %f, EDGwt=%f, Parent=%d \n", index, SSSP[index].Dist, SSSP[index].EDGwt, SSSP[index].Parent);
+//			//Test code end
+//
+//			d_mychange[index] = 0;
+//			int px = SSSP[index].Parent;
+//
+//			//For its nieghbors in X
+//			for (int j = 0; j < d_colStartPtr_X[index+1] - d_colStartPtr_X[index]; j++)
+//			{
+//				////TEPS:
+//				//*te = *te + 1;
+//				int myn = cuda_adjlist_full_X[d_colStartPtr_X[index] + j].col;
+//				double mywt = cuda_adjlist_full_X[d_colStartPtr_X[index] + j].wt;
+//
+//				if (mywt < 0) { continue; }
+//
+//				//Check that the Edge weight matches the parent
+//				 //NOTE:using atomic structures can reduce this step
+//				if (myn == px)
+//				{
+//					if (SSSP[index].EDGwt == inf) { continue; }
+//				}
+//
+//				if (myn == px)
+//				{
+//					double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
+//
+//					if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist))
+//					{
+//						/*SSSP[index].EDGwt = mywt;*/ //check. added recently 01-19-20
+//						if (d_UpdatedDist[index] >= inf)
+//						{
+//							d_UpdatedDist[index] = inf;
+//						}
+//						else
+//						{
+//							d_UpdatedDist[index] = mydist;
+//						}
+//
+//						d_mychange[index] = 1;
+//						change_d[0] = 1;
+//					} //end of if
+//
+//					continue;
+//				}//end of if
+//
+//
+//				//Update for Neigbors
+//				//If distance INF set all neghbors distance to INF at the first iteration
+//				if (d_UpdatedDist[index] >= inf /*&& its == 0*/) //check. added recently 01-19-20
+//				{
+//					if (SSSP[myn].Parent == index) { //check. if added recently 01-19-20
+//						d_UpdatedDist[myn] = inf;
+//						/*printf("check1: myn= %d, set to inf", myn);*/ //test
+//						SSSP[myn].Update = true;
+//						//mychange[i]=true;
+//						change_d[0] = 1;
+//					}
+//
+//				}
+//				else {
+//					//If Distance of myn is larger--make i its parent
+//					if (SSSP[myn].EDGwt >= mywt) //check. added recently 01-19-20
+//					{
+//						if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt)
+//						{
+//							//printf("came heruu e\n");
+//
+//							SSSP[myn].Parent = index;
+//							SSSP[myn].EDGwt = mywt;
+//							d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
+//							printf("Check 1C. index: %d", myn);
+//							SSSP[myn].Update = true;
+//							//mychange[i]=true;
+//							change_d[0] = 1;
+//						}
+//					}
+//					else //if SSSP[myn].EDGwt < mywt, means SSSP[myn].EDGwt  already updated to a lower value //check. added recently 01-19-20 //else part is added
+//					{
+//						if (SSSP[myn].Parent == index && (d_UpdatedDist[myn] > d_UpdatedDist[index] + SSSP[myn].EDGwt))
+//						{
+//							//printf("came heruu e\n");
+//
+//							d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
+//							printf("Check 1B. index: %d", myn);
+//							SSSP[myn].Update = true;
+//							//mychange[i]=true;
+//							change_d[0] = 1;
+//						}
+//					}
+//				}//end of else
+//			}//end of for
+//
+//			 //++++++++++++++++++++//
+//
+//			//Check Possible Neighbors in R
+//			for (int j = 0; j < colStartPtr_R[index + 1] - colStartPtr_R[index]; j++)
+//			{
+//				int myn = cuda_adjlist_full_R[colStartPtr_R[index] + j].col;
+//				double mywt = cuda_adjlist_full_R[colStartPtr_R[index] + j].wt;
+//
+//				 //check if edge is deleted
+//				if (mywt < 0) { continue; }
+//
+//				//Check that the Edge weight && Distance matches the parent
+//				//NOTE:using atomic structur es can reduce this step
+//				if (myn == px)
+//				{
+//					//printf("hhhXX %d %f\n", myn, mywt);
+//					/*if (SSSP[index].EDGwt == inf) { continue; }*/ //check. added recently 01-19-20
+//
+//					double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
+//
+//					if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist)) {
+//						/*SSSP[index].EDGwt = mywt;*/ //check. added recently. commented on 23-01-2020
+//						printf("Check 1A. index: %d dist: %f, edge weight: %f \n", index, mydist, SSSP[index].EDGwt);
+//						if (d_UpdatedDist[index] >= inf)
+//						{
+//							d_UpdatedDist[index] = inf;
+//						}
+//						else
+//						{
+//							d_UpdatedDist[index] = mydist;
+//							printf("Check 1A. index: %d dist: %f, edge weight: %f \n", index, mydist, SSSP[index].EDGwt);
+//						}
+//
+//						d_mychange[index] = 1;
+//						change_d[0] = 1;
+//					} //end of if
+//					continue;
+//				}//end of if
+//
+//
+//				//Update for Possible Neighbors
+//				if (d_UpdatedDist[myn] >= inf) { continue; }
+//
+//				 //Connect disconnected vertices--after first iter
+//				if ((d_UpdatedDist[index] >= inf) && (d_UpdatedDist[myn] < inf))
+//				{
+//
+//					if (/*its > 0 && */(SSSP[myn].Parent != index)) //check. added recently 01-19-20
+//					{
+//						SSSP[index].Parent = myn;
+//						SSSP[index].EDGwt = mywt;
+//						d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
+//						printf("Connecting disconnected vertices");
+//					}
+//					//SSSP->at(myn).Update=true;
+//					d_mychange[index] = 1;
+//					change_d[0] = 1;
+//				 //   continue;
+//				}
+//
+//				//If Distance of myn is larger--make i its parent
+//				if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt)
+//				{
+//					// printf("came herXXe %d::%d %f %f %f\n", i,myn,UpdatedDist[myn],UpdatedDist[i],mywt);
+//					SSSP[myn].Parent = index;
+//					SSSP[myn].EDGwt = mywt;
+//
+//					if (d_UpdatedDist[myn] >= inf)
+//					{
+//						d_UpdatedDist[myn] = inf;
+//					}
+//					else
+//					{
+//						d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
+//						printf("Check 1. index: %d", index);
+//					}
+//
+//					SSSP[myn].Update = true;
+//					//mychange[i]=true;
+//					change_d[0] = 1;
+//				}
+//
+//			}//end of for
+//
+//			//if no change occured then update is done
+//			if (d_mychange[index] != 1)
+//			{
+//				SSSP[index].Update = false;
+//			}
+//			else
+//			{
+//				SSSP[index].Update = true;
+//			}
+//		}//end of if Updated
+//	}//end of for all nodes
+//}
 
 
 //revised function //check. recently added function. 24-01-2020
