@@ -148,7 +148,7 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 			Edgedone[index] = 0; //mark to not add
 		}
 
-		if (allChange_cuda[index].inst == 1)
+		if (allChange_cuda[index].inst == 1)  //check x
 		{
 			//Check if edge exists--then dont insert 
 			for (int k = 0; k < d_colStartPtr_X[node_1 + 1] - d_colStartPtr_X[node_1]; k++)
@@ -194,9 +194,9 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 					//Update Parent and EdgeWt
 					SSSP[node2].Parent = node1;
 					SSSP[node2].EDGwt = edge_weight;
-					d_UpdatedDist[node2] = d_UpdatedDist[SSSP[node2].Parent] + SSSP[node2].EDGwt;
+					d_UpdatedDist[node2] = d_UpdatedDist[node1] + edge_weight;
 					SSSP[node2].Update = true;
-
+					/*printf("@@@@node: %d, parent: %d, dist: %f", node2, SSSP[node2].Parent, d_UpdatedDist[node2]);*/
 					//Mark Edge to be added--node1 updated
 					Edgedone[index] = 1;
 					break;
@@ -206,6 +206,8 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 
 		}//end of if insert
 
+		//Deletion case
+		//in case of deletion we don't update d_UpdatedDist
 		if (allChange_cuda[index].inst == 0 && Edgedone[index] != 0)  //if deleted
 		{
 			Edgedone[index] = 3;
@@ -269,17 +271,12 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 				}
 			}//end of if
 
-				//If not Key Edge Delete from remainder edges
-				//Set weights to -1;
-			else
-			{
-				//==From remainder edges
-				//TBD: Only delete for mye.node1< mye.node2
+
+			/*else      // check. recently added 24-01-2020. The below part is required for all as we consider full graph
+			{*/
 
 				for (int k = 0; k < colStartPtr_R[node_1 + 1] - colStartPtr_R[node_1]; k++)
 				{
-					////TEPS:
-					//*te = *te + 1;
 					int myn = cuda_adjlist_full_R[colStartPtr_R[node_1] + k].col;
 					if (myn == node_2)
 					{
@@ -291,8 +288,6 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 
 				for (int k = 0; k < colStartPtr_R[node_2 + 1] - colStartPtr_R[node_2]; k++)
 				{
-					////TEPS:
-					//*te = *te + 1;
 					int myn = cuda_adjlist_full_R[colStartPtr_R[node_2] + k].col;
 					if (myn == node_1)
 					{
@@ -302,7 +297,7 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 
 				}//end of for
 
-			}//end of if
+			//}//end of if
 
 		}//end of else if deleted
 	}
@@ -315,7 +310,7 @@ __global__ void checkInsertedEdges(int numS, int* Edgedone, double* d_UpdatedDis
 	if (index < numS)
 	{
 
-		if (Edgedone[index] == 1)
+		if (Edgedone[index] == 1) //Edgedone will be 1 when edge is marked to be inserted
 		{
 
 			//get the edge
@@ -338,13 +333,13 @@ __global__ void checkInsertedEdges(int numS, int* Edgedone, double* d_UpdatedDis
 				node2 = node_1;
 			}
 
-			 //Check if some other edge was added--mark edge to be added
+			 //Check if some other edge was added--mark edge to be added //check x
 			if (d_UpdatedDist[node1] > d_UpdatedDist[node2] + edgeWeight)
 			{
 				Edgedone[index] = 1;
 			}
 
-			//Check if correct edge wt was written--mark edge to be added
+			//Check if correct edge wt was written--mark edge to be added //check x
 			if ((SSSP[node1].Parent == node2) && (SSSP[node1].EDGwt > edgeWeight))
 			{
 				Edgedone[index] = 1;
@@ -382,6 +377,7 @@ __global__ void updateDistance(int X_size, RT_Vertex* SSSP, double* d_UpdatedDis
 			printf("DP: %d:%d %d:%d \n", index, SSSP[index].Parent, px, SSSP[px].Parent);
 		}
 
+		//For deletion case
 		if (flag != 1 &&  SSSP[index].EDGwt == inf)
 		{
 			SSSP[index].Dist = inf;
@@ -395,10 +391,11 @@ __global__ void updateDistance(int X_size, RT_Vertex* SSSP, double* d_UpdatedDis
 			SSSP->at(i).Dist = *maxW; SSSP->at(i).Update = true; continue;
 		}*/
 
-
+		//for insertion case
 		if (flag != 1 && SSSP[index].Dist > d_UpdatedDist[index])
 		{
 			SSSP[index].Dist = d_UpdatedDist[index];
+			/*printf("In updateDistance:  index: %d, dist:%f\n", index, SSSP[index].Dist);*/
 			SSSP[index].Update = true;
 		}
 
@@ -410,12 +407,13 @@ __global__ void initializeUpdatedDistOldDist(double* d_UpdatedDist, double* d_Ol
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 	if (index < X_size)
 	{
-		d_UpdatedDist[index] = SSSP[index].Dist;
+		d_UpdatedDist[index] = SSSP[index].Dist; //this will fill up the d_UpdatedDist values for deletion case also
 		d_OldUpdate[index] = SSSP[index].Dist;
+		/*printf("****Inside initializeUpdatedDistOldDist: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);*/
 	}
 }
 
-__global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_size, int* d_mychange, int* d_colStartPtr_X, Colwt2* cuda_adjlist_full_X, double inf, int* change_d, int its, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R)
+__global__ void updateNeighbors_old(double* d_UpdatedDist, RT_Vertex* SSSP, int X_size, int* d_mychange, int* d_colStartPtr_X, Colwt2* cuda_adjlist_full_X, double inf, int* change_d, int its, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 	if (index < X_size)
@@ -496,7 +494,7 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 							SSSP[myn].Parent = index;
 							SSSP[myn].EDGwt = mywt;
 							d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
-
+							printf("Check 1C. index: %d", myn);
 							SSSP[myn].Update = true;
 							//mychange[i]=true;
 							change_d[0] = 1;
@@ -509,7 +507,7 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 							//printf("came heruu e\n");
 
 							d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
-
+							printf("Check 1B. index: %d", myn);
 							SSSP[myn].Update = true;
 							//mychange[i]=true;
 							change_d[0] = 1;
@@ -539,7 +537,8 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 					double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
 
 					if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist)) {
-						SSSP[index].EDGwt = mywt;
+						/*SSSP[index].EDGwt = mywt;*/ //check. added recently. commented on 23-01-2020
+						printf("Check 1A. index: %d dist: %f, edge weight: %f \n", index, mydist, SSSP[index].EDGwt);
 						if (d_UpdatedDist[index] >= inf)
 						{
 							d_UpdatedDist[index] = inf;
@@ -547,6 +546,7 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 						else
 						{
 							d_UpdatedDist[index] = mydist;
+							printf("Check 1A. index: %d dist: %f, edge weight: %f \n", index, mydist, SSSP[index].EDGwt);
 						}
 
 						d_mychange[index] = 1;
@@ -590,6 +590,7 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 					else
 					{
 						d_UpdatedDist[myn] = d_UpdatedDist[SSSP[myn].Parent] + SSSP[myn].EDGwt;
+						printf("Check 1. index: %d", index);
 					}
 
 					SSSP[myn].Update = true;
@@ -610,6 +611,195 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 			}
 		}//end of if Updated
 	}//end of for all nodes
+}
+
+
+//revised function //check. recently added function. 24-01-2020
+__global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_size, int* d_mychange, int* d_colStartPtr_X, Colwt2* cuda_adjlist_full_X, double inf, int* change_d, int its, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R)
+{
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+	if (index < X_size)
+	{
+
+		//If i is updated--update its neighbors as required
+		if (SSSP[index].Update)
+		{
+			SSSP[index].Update = false;
+			for (int j = 0; j < colStartPtr_R[index + 1] - colStartPtr_R[index]; j++)
+			{
+				int myn = cuda_adjlist_full_R[colStartPtr_R[index] + j].col;
+				double mywt = cuda_adjlist_full_R[colStartPtr_R[index] + j].wt;
+
+				if (SSSP[myn].EDGwt < mywt && SSSP[myn].Parent == index ) //check if we have taken an edge with lower weight from the changeEdge set. if yes then don't update edgeweight
+				{
+					mywt = SSSP[myn].EDGwt;
+				}
+
+				/*printf("****####index: %d col: %d  weight: %f\n", index, myn, mywt);*/
+				printf("****####index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+				printf("****myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+
+				//check if edge is deleted
+				if (mywt < 0) { continue; } //if mywt = -1, that means node was deleted
+				if (SSSP[index].Dist == inf)
+				{
+					printf("$$$$: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+					printf("$$$$myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+					if (myn == SSSP[index].Parent)
+					{
+						continue;
+					}
+					if (SSSP[myn].Parent == index)
+					{
+						d_UpdatedDist[myn] = inf;
+						SSSP[myn].Dist = inf;
+						SSSP[myn].Update = true;
+						change_d[0] = 1;
+						printf("&&&&index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+						printf("&&&&myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+						continue;
+					}
+					else {
+						if (SSSP[myn].Dist != inf)
+						{
+							d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
+							SSSP[index].Dist = d_UpdatedDist[myn] + mywt;
+							SSSP[index].Parent = myn;
+							SSSP[index].EDGwt = mywt;
+							SSSP[index].Update = true;
+							change_d[0] = 1;
+							printf("++++index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+							printf("++++myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+
+							continue;
+						}
+					}
+					
+				}
+				if (SSSP[index].Dist != inf)
+				{
+					printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+					printf("Not infmyn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+					if (SSSP[myn].Dist == inf)
+					{
+						if (SSSP[index].Parent != myn)
+						{
+							//if (SSSP[myn].EDGwt < mywt && (SSSP[myn].Parent == index)) //check if we have taken an edge with lower weight from the changeEdge set. if yes then don't update edgeweight
+							//{
+							//	mywt = SSSP[myn].EDGwt;
+							//}
+							d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
+							SSSP[myn].Dist = SSSP[index].Dist + mywt;
+							SSSP[myn].EDGwt = mywt;
+							SSSP[myn].Update = true;
+							SSSP[myn].Parent = index;
+							change_d[0] = 1;
+							continue;
+						}
+						else {
+							//don't do anything if myn is parent of index node
+							continue;
+						}
+						
+					}
+					if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt) //update both cases where parent of myn == index or parent of myn != index
+					{
+						//if (SSSP[myn].EDGwt < mywt && SSSP[myn].Parent == index) //check if we have taken an edge with lower weight from the changeEdge set. if yes then don't update edgeweight
+						//{
+						//	mywt = SSSP[myn].EDGwt;
+						//}
+						d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
+						SSSP[myn].Dist = d_UpdatedDist[index] + mywt;
+						SSSP[myn].Update = true;
+						SSSP[myn].Parent = index;
+						change_d[0] = 1;
+						printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+						printf("Not infmyn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+						continue;
+					}
+					else
+					{
+						if (SSSP[myn].Parent == index)
+						{
+							d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
+							SSSP[myn].Dist = d_UpdatedDist[index] + mywt;
+							SSSP[myn].Update = true;
+							/*SSSP[myn].Parent = index;*/ //Parent will remain same
+							change_d[0] = 1;
+							continue;
+						}
+						if ((d_UpdatedDist[index] > d_UpdatedDist[myn] + mywt) /*&& (SSSP[myn].Parent != index)*/)
+						{
+							d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
+							SSSP[index].Dist = d_UpdatedDist[myn] + mywt;
+							SSSP[index].Update = true;
+							SSSP[index].Parent = myn;
+							change_d[0] = 1;
+						}
+						
+					}
+				}
+
+
+				//if (myn == SSSP[index].Parent)
+				//{
+				//	
+				//	if (SSSP[index].EDGwt == inf) { continue; }
+
+				//
+				//	double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
+
+				//	if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist))
+				//	{
+				//		/*SSSP[index].EDGwt = mywt;*/ //check. added recently 01-19-20
+				//		if (d_UpdatedDist[index] >= inf)
+				//		{
+				//			d_UpdatedDist[index] = inf;
+				//		}
+				//		else
+				//		{
+				//			d_UpdatedDist[index] = mydist;
+				//		}
+
+				//		d_mychange[index] = 1;
+				//		change_d[0] = 1;
+				//	} //end of if
+
+				//	continue;
+				//	
+				//}
+
+				//if ((d_UpdatedDist[index] >= inf) && (SSSP[myn].Parent == index))
+				//{
+				//	d_UpdatedDist[myn] = inf;
+				//	SSSP[myn].Update = true;
+				//	change_d[0] = 1;
+				//}
+				//else
+				//{
+				//	if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt)
+				//	{
+				//		d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
+				//		SSSP[myn].Update = true;
+				//		SSSP[myn].Parent = index;
+				//		change_d[0] = 1;
+				//	}
+				//	else
+				//	{
+				//		if (d_UpdatedDist[index] > d_UpdatedDist[myn] + mywt)
+				//		{
+				//			d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
+				//			SSSP[index].Update = true;
+				//			SSSP[index].Parent = myn;
+				//			change_d[0] = 1;
+				//		}
+				//	}
+				//}
+
+			}
+
+		}
+	}
 }
 
 __global__ void checkIfDistUpdated(int X_size, double* d_OldUpdate, double*  d_UpdatedDist, RT_Vertex* SSSP)
@@ -653,6 +843,7 @@ __global__ void updateDistanceFinal(int X_size, double* d_UpdatedDist, RT_Vertex
 			else
 			{
 				SSSP[index].Dist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
+				printf("Check 2. index: %d dist: %f, parent dist:%f, edgewt: %f \n", index, SSSP[index].Dist, d_UpdatedDist[SSSP[index].Parent], SSSP[index].EDGwt); //Test 23-01-2020
 			}
 		}
 	}
