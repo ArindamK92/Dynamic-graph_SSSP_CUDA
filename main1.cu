@@ -435,15 +435,16 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 				}
 
 				/*printf("****####index: %d col: %d  weight: %f\n", index, myn, mywt);*/
-				printf("****####index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-				printf("****myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+				/*printf("****####index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+				printf("****myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);*/
 
 				//check if edge is deleted
 				if (mywt < 0) { continue; } //if mywt = -1, that means node was deleted
 				if (SSSP[index].Dist == inf)
 				{
-					printf("$$$$: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+					/*printf("$$$$: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
 					printf("$$$$myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+					*/
 					if (myn == SSSP[index].Parent)
 					{
 						continue;
@@ -454,8 +455,9 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 						SSSP[myn].Dist = inf;
 						SSSP[myn].Update = true;
 						change_d[0] = 1;
-						printf("&&&&index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+						/*printf("&&&&index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
 						printf("&&&&myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+						*/
 						continue;
 					}
 					else {
@@ -467,8 +469,8 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 							SSSP[index].EDGwt = mywt;
 							SSSP[index].Update = true;
 							change_d[0] = 1;
-							printf("++++index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-							printf("++++myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+							/*printf("++++index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+							printf("++++myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);*/
 
 							continue;
 						}
@@ -477,8 +479,9 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 				}
 				if (SSSP[index].Dist != inf)
 				{
-					printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+					/*printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
 					printf("Not infmyn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+					*/
 					if (SSSP[myn].Dist == inf)
 					{
 						if (SSSP[index].Parent != myn)
@@ -512,8 +515,9 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 						SSSP[myn].Update = true;
 						SSSP[myn].Parent = index;
 						change_d[0] = 1;
-						printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
+						/*printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
 						printf("Not infmyn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
+						*/
 						continue;
 					}
 					else
@@ -538,62 +542,6 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 
 					}
 				}
-
-
-				//if (myn == SSSP[index].Parent)
-				//{
-				//	
-				//	if (SSSP[index].EDGwt == inf) { continue; }
-
-				//
-				//	double mydist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
-
-				//	if ((SSSP[index].EDGwt != mywt) || (d_UpdatedDist[index] > mydist))
-				//	{
-				//		/*SSSP[index].EDGwt = mywt;*/ //check. added recently 01-19-20
-				//		if (d_UpdatedDist[index] >= inf)
-				//		{
-				//			d_UpdatedDist[index] = inf;
-				//		}
-				//		else
-				//		{
-				//			d_UpdatedDist[index] = mydist;
-				//		}
-
-				//		d_mychange[index] = 1;
-				//		change_d[0] = 1;
-				//	} //end of if
-
-				//	continue;
-				//	
-				//}
-
-				//if ((d_UpdatedDist[index] >= inf) && (SSSP[myn].Parent == index))
-				//{
-				//	d_UpdatedDist[myn] = inf;
-				//	SSSP[myn].Update = true;
-				//	change_d[0] = 1;
-				//}
-				//else
-				//{
-				//	if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt)
-				//	{
-				//		d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
-				//		SSSP[myn].Update = true;
-				//		SSSP[myn].Parent = index;
-				//		change_d[0] = 1;
-				//	}
-				//	else
-				//	{
-				//		if (d_UpdatedDist[index] > d_UpdatedDist[myn] + mywt)
-				//		{
-				//			d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
-				//			SSSP[index].Update = true;
-				//			SSSP[index].Parent = myn;
-				//			change_d[0] = 1;
-				//		}
-				//	}
-				//}
 
 			}
 
@@ -642,7 +590,7 @@ __global__ void updateDistanceFinal(int X_size, double* d_UpdatedDist, RT_Vertex
 			else
 			{
 				SSSP[index].Dist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
-				printf("Check 2. index: %d dist: %f, parent dist:%f, edgewt: %f \n", index, SSSP[index].Dist, d_UpdatedDist[SSSP[index].Parent], SSSP[index].EDGwt); //Test 23-01-2020
+				//printf("Check 2. index: %d dist: %f, parent dist:%f, edgewt: %f \n", index, SSSP[index].Dist, d_UpdatedDist[SSSP[index].Parent], SSSP[index].EDGwt); //Test 23-01-2020
 			}
 		}
 	}
@@ -958,7 +906,7 @@ int main(int argc, char* argv[]) {
 		int te = 0;
 		auto startTime1 = high_resolution_clock::now();
 		edge_update(&totalChange, &x_size, &SSSP_size, allChange_cuda, cuda_adjlist_full_X, colStartPtr_X, SSSP, cuda_adjlist_full_R, colStartPtr_R, &te, &nodes);
-		cout << "after edge_update fn" << endl;
+		/*cout << "after edge_update fn" << endl;*/
 		//Time calculation
 		auto stopTime1 = high_resolution_clock::now();
 		// Time calculation
@@ -968,7 +916,7 @@ int main(int argc, char* argv[]) {
 
 		auto startTime2 = high_resolution_clock::now();
 		rest_update(&x_size, cuda_adjlist_full_X, colStartPtr_X, SSSP, cuda_adjlist_full_R, colStartPtr_R, &nodes);
-		cout << "after rest_update fn" << endl;
+		/*cout << "after rest_update fn" << endl;*/
 		//Time calculation
 		auto stopTime2 = high_resolution_clock::now();
 		// Time calculation

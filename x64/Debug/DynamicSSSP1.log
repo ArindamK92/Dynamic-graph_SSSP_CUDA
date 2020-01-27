@@ -9,43 +9,43 @@ C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(162
   
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(302): warning : variable "i" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1063): warning : variable "result" was set but never used
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(810): warning : variable "result" was set but never used
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning : variable "startx" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning : variable "startx" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning : variable "endx" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning : variable "endx" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning : variable "starty" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning : variable "starty" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning : variable "endy" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning : variable "endy" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1215): warning : variable "iter" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(962): warning : variable "iter" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1331): warning : variable "iter" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1078): warning : variable "iter" was declared but never referenced
   
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(222): warning : variable "nodes" was declared but never referenced
             detected during instantiation of "void readin_network(myNetworkType *, char *, int) [with myNetworkType=A_Network]" 
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(944): here
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(691): here
   
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(232): warning : variable "i" was declared but never referenced
             detected during instantiation of "void readin_network(myNetworkType *, char *, int) [with myNetworkType=A_Network]" 
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(944): here
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(691): here
   
   main1.cu
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(147): warning C4101: 'edge_wt': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(903): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(912): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(955): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(964): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(997): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1117): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1157): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning C4101: 'starty': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning C4101: 'endx': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning C4101: 'endy': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(858): warning C4101: 'startx': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(650): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(659): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(702): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(711): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(744): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(864): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(904): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning C4101: 'starty': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning C4101: 'endx': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning C4101: 'endy': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(605): warning C4101: 'startx': unreferenced local variable
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(222): warning C4101: 'nodes': unreferenced local variable
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(944): note: see reference to function template instantiation 'void readin_network<A_Network>(myNetworkType *,char *,int)' being compiled
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(691): note: see reference to function template instantiation 'void readin_network<A_Network>(myNetworkType *,char *,int)' being compiled
           with
           [
               myNetworkType=A_Network
@@ -92,7 +92,7 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/c
               InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
               EqualityComparable=int
           ]
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1117): note: see reference to function template instantiation '__int64 thrust::count<thrust::detail::normal_iterator<thrust::device_ptr<int>>,int>(InputIterator,InputIterator,const EqualityComparable &)' being compiled
+  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(864): note: see reference to function template instantiation '__int64 thrust::count<thrust::detail::normal_iterator<thrust::device_ptr<int>>,int>(InputIterator,InputIterator,const EqualityComparable &)' being compiled
           with
           [
               InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
