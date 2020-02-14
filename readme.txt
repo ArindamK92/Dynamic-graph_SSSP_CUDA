@@ -8,7 +8,7 @@ keep changeEdges.txt, fullGraph.txt and SSSP.txt in the same folder where you wi
 srun --partition=gpu --gres=gpu --mem=4gb --ntasks-per-node=2 --nodes=1 --pty
 
 2. command to compile 
-nvcc -o op main1.cu
+nvcc -o op main2.cu
 
 3.create the job batch.sub 
 #!/bin/sh
@@ -26,3 +26,9 @@ module load cuda
 
 4. run the job 
 sbatch batch.sub
+
+
+****Debug using gdb****
+1. gdb op
+2. run
+3. bt
