@@ -139,8 +139,8 @@ void readin_graphU(A_Network* X, int nodes, char* myfile)
 {
 
 	//Initialize for X
-	ADJ_Bundle AList; //create current Adj_Bundle
-	X->resize(nodes, AList);
+	/*ADJ_Bundle AList;*/ //create current Adj_Bundle
+	/*X->resize(nodes, AList);*/
 	int_double colvals;
 	int_double colvals2;
 	int node1, node2;
@@ -157,7 +157,7 @@ void readin_graphU(A_Network* X, int nodes, char* myfile)
 
 	// Execute a loop until EOF (End of File) 
 	/*vector<float> inputList;*/
-	vector<int_double> ListW;
+	/*vector<int_double> ListW;*/
 	int current_node = 0;
 	int i = 0;
 	vector<float> inputList;
@@ -172,13 +172,35 @@ void readin_graphU(A_Network* X, int nodes, char* myfile)
 		while (iss >> word)
 		{
 			inputList.push_back(stof(word));
+			if (i % 3 == 0)
+			{
+				node1 = (int)inputList.at(i);
+				colvals2.first = node1;
+				i++;
+
+			}
+			else if (i % 3 == 1)
+			{
+				colvals.first = (int)inputList.at(i);
+				node2 = colvals.first;
+				i++;
+			}
+			else {
+				colvals.second = inputList.at(i);
+				colvals2.second = inputList.at(i);
+				X->at(node1).ListW.push_back(colvals);
+				X->at(node2).ListW.push_back(colvals2);
+				i = 0;
+				inputList.clear();
+			}
+
 		}
 	}
 	/*for (float a : inputList)
 	{
 		cout << a << endl;
 	}*/
-	for (int i = 0; i < inputList.size() - 3; i++)
+	/*for (int i = 0; i < inputList.size() - 3; i++)
 	{
 		if (i % 3 == 0)
 		{
@@ -197,30 +219,15 @@ void readin_graphU(A_Network* X, int nodes, char* myfile)
 			X->at(node1).ListW.push_back(colvals);
 			X->at(node2).ListW.push_back(colvals2);
 		}
-
-
-		//if (current_node != node1)
-		//{
-		//	{
-		//		X->at(current_node).ListW = ListW;
-		//		ListW.clear(); //Clear List of Edges;
-
-		//	} //end of if
-
-		//	//Set to next node
-		//	current_node = node1;
-		//}
-
-		//ListW.push_back(colvals);
-	}
+	}*/
 }
 
 /**** Reading File to Create Network******/
 template <class myNetworkType>
-void readin_network(myNetworkType* X, char* file, int XtraN)
+void readin_network(myNetworkType* X, char* file, int nodes)
 {
-	int nodes;
-
+	ADJ_Bundle aBundle;
+	/*X->resize(nodes, aBundle);*/
 	vector<Edge> a;//list of all edges of network
 	Edge myedge;
 	string fileName = file;
@@ -231,6 +238,8 @@ void readin_network(myNetworkType* X, char* file, int XtraN)
 	fin.open(fileName);
 	int i = 0;
 	vector<float> inputList;
+	int node1;
+	int_double colvals;
 
 	//Read line 
 	while (fin) {
@@ -243,9 +252,27 @@ void readin_network(myNetworkType* X, char* file, int XtraN)
 		while (iss >> word)
 		{
 			inputList.push_back(stof(word));
+			if (i % 3 == 0)
+			{
+				node1 = (int)inputList.at(i);
+				i++;
+
+			}
+			else if (i % 3 == 1)
+			{
+				colvals.first = (int)inputList.at(i);
+				i++;
+			}
+			else {
+				colvals.second = inputList.at(i);
+				X->at(node1).ListW.push_back(colvals);
+				i = 0;
+				inputList.clear();
+
+			}
 		}
 	}
-	for (int i = 0; i < inputList.size() - 3; i++)
+	/*for (int i = 0; i < inputList.size() - 3; i++)
 	{
 
 		if (i % 3 == 0)
@@ -263,28 +290,30 @@ void readin_network(myNetworkType* X, char* file, int XtraN)
 			a.push_back(myedge);
 
 		}
-	}
+	}*/
 
 	/*for (int i = 0; i < a.size(); i++)
 	{
 		cout << "node 1: " << a.at(i).node1 << "node 2: " << a.at(i).node2 << "weight: " << a.at(i).edge_wt << endl;
 	}*/
-	create_Network(&a, 0, X, XtraN);
+	/*create_Network(&a, 0, X);*/
 
 	return;
 }
-void create_Network(vector<Edge>* b, int bf_size, A_Network* X, int Ns)
-{
-	for (int i = 0; i < b->size(); i++)
-	{
-		int row = b->at(i).node1;
-		int_double colWt;
-		colWt.first = b->at(i).node2;
-		colWt.second = b->at(i).edge_wt;
 
-		X->at(row).ListW.push_back(colWt);
-	}
-}
+
+//void create_Network(vector<Edge>* b, int bf_size, A_Network* X)
+//{
+//	for (int i = 0; i < b->size(); i++)
+//	{
+//		int row = b->at(i).node1;
+//		int_double colWt;
+//		colWt.first = b->at(i).node2;
+//		colWt.second = b->at(i).edge_wt;
+//
+//		X->at(row).ListW.push_back(colWt);
+//	}
+//}
 
 
 
@@ -312,10 +341,38 @@ void readin_changes(char* myfile, vector<xEdge>* allChange)
 		while (iss >> word)
 		{
 			inputList.push_back(stof(word));
+			if (i % 4 == 0)
+			{
+				myedge.theEdge.node1 = (int)inputList.at(i);
+				i++;
+			}
+			else if (i % 4 == 1)
+			{
+				myedge.theEdge.node2 = (int)inputList.at(i);
+				i++;
+			}
+			else if (i % 4 == 2) {
+				myedge.theEdge.edge_wt = inputList.at(i);
+				i++;
+			}
+			else {
+				ins = (int)inputList.at(i);
+				if (ins == 1)
+				{
+					myedge.inst = true;
+				}
+				else
+				{
+					myedge.inst = false;
+				}
+				allChange->push_back(myedge);
+				i = 0;
+				inputList.clear();
+			}
 		}
 	}
 
-	for (int i = 0; i < inputList.size() - 4; i++)
+	/*for (int i = 0; i < inputList.size() - 4; i++)
 	{
 		if (i % 4 == 0)
 		{
@@ -340,6 +397,6 @@ void readin_changes(char* myfile, vector<xEdge>* allChange)
 			}
 			allChange->push_back(myedge);
 		}
-	}
+	}*/
 	return;
 }//end of function

@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="main1.cu" />
+    <CudaCompile Include="main2.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
