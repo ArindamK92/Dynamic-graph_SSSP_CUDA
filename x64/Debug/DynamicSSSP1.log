@@ -1,85 +1,35 @@
-﻿  Compiling CUDA source file main1.cu...
+﻿  Compiling CUDA source file main2.cu...
   
-  C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\main1.cu.obj "C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\main1.cu" 
+  C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\main2.cu.obj "C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\main2.cu" 
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(183): warning : variable "l" was declared but never referenced
   
 C:\Users\khand\source\repos\DynamicSSSP1\DynamicSSSP1\all_structure_cuda.cuh(231): warning : variable "dummy" was set but never used
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(737): warning : variable "result" was set but never used
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(759): warning : variable "totalAffectedNode" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning : variable "startx" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning : variable "startx" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning : variable "endx" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning : variable "endx" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning : variable "starty" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning : variable "starty" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning : variable "endy" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning : variable "endy" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(890): warning : label "Error" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(733): warning : variable "p" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(901): warning : variable "iter" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(936): warning : label "Error" was declared but never referenced
   
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(1017): warning : variable "iter" was declared but never referenced
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(949): warning : variable "iter" was declared but never referenced
   
-  main1.cu
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(656): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(793): warning C4244: '=': conversion from '__int64' to 'int', possible loss of data
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(890): warning C4102: 'Error': unreferenced label
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning C4101: 'starty': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning C4101: 'endx': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning C4101: 'endy': unreferenced local variable
-C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(547): warning C4101: 'startx': unreferenced local variable
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/cuda/detail/reduce.h(940): warning C4244: 'argument': conversion from 'Size' to 'int', possible loss of data
-          with
-          [
-              Size=__int64
-          ]
-  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/cuda/detail/reduce.h(1018): note: see reference to function template instantiation 'T thrust::cuda_cub::detail::reduce_n_impl<thrust::cuda_cub::tag,InputIt,Size,T,BinaryOp>(thrust::cuda_cub::execution_policy<thrust::cuda_cub::tag> &,InputIt,Size,T,BinaryOp)' being compiled
-          with
-          [
-              T=size_type,
-              InputIt=flag_iterator_t,
-              Size=__int64,
-              BinaryOp=thrust::plus<__int64>
-          ]
-  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/cuda/detail/count.h(55): note: see reference to function template instantiation 'T thrust::cuda_cub::reduce_n<thrust::cuda_cub::tag,flag_iterator_t,__int64,size_type,thrust::plus<T>>(thrust::cuda_cub::execution_policy<thrust::cuda_cub::tag> &,InputIt,Size,T,BinaryOp)' being compiled
-          with
-          [
-              T=size_type,
-              InputIt=flag_iterator_t,
-              Size=__int64,
-              BinaryOp=thrust::plus<__int64>
-          ]
-  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/cuda/detail/count.h(71): note: see reference to function template instantiation '__int64 thrust::cuda_cub::count_if<thrust::cuda_cub::tag,InputIt,thrust::detail::equal_to_value<int>>(thrust::cuda_cub::execution_policy<thrust::cuda_cub::tag> &,InputIt,InputIt,UnaryPred)' being compiled
-          with
-          [
-              InputIt=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
-              UnaryPred=thrust::detail::equal_to_value<int>
-          ]
-  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/detail/count.inl(40): note: see reference to function template instantiation '__int64 thrust::cuda_cub::count<thrust::cuda_cub::tag,InputIterator,EqualityComparable>(thrust::cuda_cub::execution_policy<thrust::cuda_cub::tag> &,InputIt,InputIt,const Value &)' being compiled
-          with
-          [
-              InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
-              EqualityComparable=int,
-              InputIt=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
-              Value=int
-          ]
-  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/detail/count.inl(65): note: see reference to function template instantiation '__int64 thrust::count<DerivedPolicy,InputIterator,EqualityComparable>(const thrust::detail::execution_policy_base<DerivedPolicy> &,InputIterator,InputIterator,const EqualityComparable &)' being compiled
-          with
-          [
-              DerivedPolicy=thrust::cuda_cub::tag,
-              InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
-              EqualityComparable=int
-          ]
-  C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main1.cu(793): note: see reference to function template instantiation '__int64 thrust::count<thrust::detail::normal_iterator<thrust::device_ptr<int>>,int>(InputIterator,InputIterator,const EqualityComparable &)' being compiled
-          with
-          [
-              InputIterator=thrust::detail::normal_iterator<thrust::device_ptr<int>>,
-              EqualityComparable=int
-          ]
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\include\thrust/system/cuda/detail/reduce.h(969): warning C4244: 'argument': conversion from 'Size' to 'int', possible loss of data
-          with
-          [
-              Size=__int64
-          ]
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(1065): warning : variable "iter" was declared but never referenced
+  
+  main2.cu
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(696): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(936): warning C4102: 'Error': unreferenced label
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning C4101: 'starty': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning C4101: 'endx': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning C4101: 'endy': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(733): warning C4101: 'p': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(587): warning C4101: 'startx': unreferenced local variable
+C:/Users/khand/source/repos/DynamicSSSP1/DynamicSSSP1/main2.cu(759): warning C4101: 'totalAffectedNode': unreferenced local variable
   DynamicSSSP1.vcxproj -> C:\Users\khand\source\repos\DynamicSSSP1\x64\Debug\DynamicSSSP1.exe
