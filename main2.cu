@@ -582,6 +582,14 @@ __global__ void updateDistanceFinal(int X_size, double* d_UpdatedDist, RT_Vertex
 void edge_update(int* totalChange, int* X_size, int* SSSP_size, xEdge_cuda* allChange_cuda, Colwt2* cuda_adjlist_full_X, int* colStartPtr_X, RT_Vertex* SSSP, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R, int* te, int* nodes);
 void rest_update(int* X_size, Colwt2* cuda_adjlist_full_X, int* colStartPtr_X, RT_Vertex* SSSP, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R, int* nodes);
 
+
+/*
+1st arg: original graph file name
+2nd arg: input SSSP file name
+3rd arg: change edges file name
+4th arg: no. of nodes
+5th arg: no. of edges
+*/
 int main(int argc, char* argv[]) {
 
 	double startx, endx, starty, endy;
@@ -591,12 +599,14 @@ int main(int argc, char* argv[]) {
 	int nodes, edges;
 	cudaError_t cudaStatus;
 
-	printf("Enter number of total nodes: ");
+	/*printf("Enter number of total nodes: ");
 	scanf("%d", &nodes);
 	printf("Enter number of total edges: ");
 	scanf("%d", &edges);
-	printf("check 0");
+	printf("check 0");*/
 
+	nodes = atoi(argv[4]); //when cmd line arg used
+	edges = atoi(argv[5]); //when cmd line arg used
 
 
 	/*** Read Full Graph ***/
@@ -627,13 +637,12 @@ int main(int argc, char* argv[]) {
 
 	//use below code to pass the file name as relative path.
 	//**keep the files in the same folder
-	string file1 = "./fullGraph.txt";
-	char* cstr1 = &file1[0];
-	/*readin_graphU(&R, nodes, cstr1);*/
-	/*readin_graphU2(&R, nodes, cstr1);*/ //new running
-	readin_graphU4(colStartPtr_R, cuda_adjlist_full_R, cstr1, &nodes);
-	/*readin_network2(&R, cstr1, -1);
-	*/
+	//string file1 = "./fullGraph.txt";
+	//char* cstr1 = &file1[0];
+	//readin_graphU4(colStartPtr_R, cuda_adjlist_full_R, cstr1, &nodes); //when local file used
+
+	readin_graphU4(colStartPtr_R, cuda_adjlist_full_R, argv[1], &nodes); //when cmd line arg used
+
 	cout << "success 2" << endl;
 	/*for (int i = 0; i < nodes + 1; i++)
 	{
@@ -656,19 +665,15 @@ int main(int argc, char* argv[]) {
 		/*goto Error;*/
 	}
 	cout << "success 3" << endl;
-	//use below for direct path
-	/*string file2 = "C:\\Users\\khand\\Desktop\\PhD\\CUDA test\\Test\\test 1\\SSSP.txt";
-	char* cstr2 = &file2[0];
-	readin_network(&X, cstr2, -1);*/
-
-	//use below code if we use pass file name as argument
-	/*readin_network(&X, argv[2], -1);*/
 
 	//use below code to pass the file name as relative path.
 	//**keep the files in the same folder
-	string file2 = "./SSSP.txt";
-	char* cstr2 = &file2[0];
-	readin_graphU4(colStartPtr_X, cuda_adjlist_full_X, cstr2, &nodes);
+	//string file2 = "./SSSP.txt";
+	//char* cstr2 = &file2[0];
+	//readin_graphU4(colStartPtr_X, cuda_adjlist_full_X, cstr2, &nodes); //when local SSSP file used
+
+	//when cmd line arg used
+	readin_graphU4(colStartPtr_X, cuda_adjlist_full_X, argv[2], &nodes); //when cmd line arg used
 	cout << "success 4" << endl;
 	/*** Finished Reading input SSSP **/
 
@@ -687,9 +692,12 @@ int main(int argc, char* argv[]) {
    /*readin_changes(argv[3], &allChange);*/
 
    //use below code to pass the file name as relative path.
-	string file3 = "./changeEdges.txt";
+	/*string file3 = "./changeEdges.txt";
 	char* cstr3 = &file3[0];
-	readin_changes(cstr3, &allChange);
+	readin_changes(cstr3, &allChange);*/
+
+	readin_changes(argv[3], &allChange); //when cmd line arg used
+
 	cout << "success 5" << endl;
 	//new addition
 	xEdge_cuda* allChange_cuda;
@@ -728,8 +736,10 @@ int main(int argc, char* argv[]) {
 	int graphDirectedUndirectedIndicator = 0; // Should be 1 for SCC, 0 for not SCC. need to modify if we want SCC
 
 	int source;
-	printf("Enter source node: ");
-	scanf("%d", &source);
+	/*printf("Enter source node: ");
+	scanf("%d", &source);*/
+	source = 0; //default we have taken 0 as source node
+
 	int p;
 
 
@@ -789,77 +799,6 @@ int main(int argc, char* argv[]) {
 
 		}
 
-
-		//totalAffectedNode = 1;
-		//int start = 0, end = 0;
-		//int* affected_nodes;
-		//affected_nodes = (int*)calloc(totalAffectedNode, sizeof(int));
-		//affected_nodes[0] = src;
-		//cudaStream_t stream1;
-		//cudaError_t result;
-		//result = cudaStreamCreate(&stream1);
-		//try
-		//{
-		//	while (totalAffectedNode > 0)
-		//	{
-		//		vector<int> affectedNodeAlias;
-		//		for (int i = 0; i < totalAffectedNode; i++)
-		//		{
-		//			affectedNodeAlias.push_back(affected_nodes[i]);
-		//		}
-		//		for (int i = 0; i < totalAffectedNode; i++)
-		//		{
-		//			p = affectedNodeAlias.at(i);
-		//			src = p;
-		//			start = colStartPtr_X[p];
-		//			end = colStartPtr_X[p + 1];
-		//			int numberofCudaThread = end - start;
-
-		//			//create_tree method creates the SSSP tree with values stored in cuda_adjlist_full_X.
-		//			//This SSSP tree is the input SSSP tree
-		//			create_tree << <(numberofCudaThread / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK, 0, stream1 >> > (cuda_adjlist_full_X, start, SSSP, src, d_affectedPointer, numberofCudaThread);
-		//		}
-		//		cudaStreamSynchronize(stream1);
-
-		//		thrust::device_ptr<int> affectedPointer_alias(d_affectedPointer); // converting raw ptr to device_ptr
-		//		cout << "check X.2";
-		//		cudaMemcpy(affectedPointer, d_affectedPointer, nodes * sizeof(int), cudaMemcpyDeviceToHost);
-		//		cout << "check Y";
-		//		thrust::device_vector<int> affectedPointer_vector(affectedPointer_alias, affectedPointer_alias + nodes); //converting device_ptr to device_vector
-		//		cout << "check Y.2";
-		//		totalAffectedNode = thrust::count(affectedPointer_vector.begin(), affectedPointer_vector.end(), 1); //count the number of affected node
-		//		cout << "total affected node" << totalAffectedNode << endl;
-		//		affected_nodes = (int*)realloc(affected_nodes, totalAffectedNode * sizeof(int));
-		//		/*affectedPointer = thrust::raw_pointer_cast(&affectedPointer_vector[0]);*/
-		//		thrust::copy_if(thrust::host, stencil_c, stencil_c + nodes, affectedPointer, affected_nodes, is_affected());
-		//		cout << "check Y.3";
-
-
-		//		//Test code - start
-		//		/*cout << "affected nodes " << endl;
-		//		for (int i = 0; i < totalAffectedNode; i++)
-		//		{
-		//			cout << affected_nodes[i] << endl;
-		//		}*/
-		//		//Test code - end
-		//		free(affectedPointer);
-		//		cout << "check Y.4";
-		//		affectedPointer = (int*)calloc(nodes, sizeof(int));
-		//		cudaMemcpy(d_affectedPointer, affectedPointer, nodes * sizeof(int), cudaMemcpyHostToDevice);
-		//		cout << "check Y.5";
-		//		////clear thrust vector:
-		//		//affectedPointer_vector.clear();
-		//		//affectedPointer_vector.shrink_to_fit();
-		//		/*cudaFree(threadHelpers);*/
-		//	}
-		//}
-		//catch (thrust::system_error e)
-		//{
-		//	std::cerr << "Error from thrust: " << e.what() << std::endl;
-		//	free(affectedPointer);
-		//	free(affected_nodes);
-		//	cudaFree(d_affectedPointer);
-		//}
 		free(affectedPointer);
 		/*free(affected_nodes);*/
 		cudaFree(d_affectedPointer);
@@ -921,8 +860,13 @@ int main(int argc, char* argv[]) {
 	{
 		cout << "*******" << endl;
 		cout << "node" << i << endl << "dist" << SSSP[i].Dist << endl << "parent" << SSSP[i].Parent << endl;
+	}
+	cout << "*******success*******" << endl;*/
+	/*for (int i = 262140; i < 262144; i++)
+	{
+		cout << "*******" << endl;
+		cout << "node" << i << endl << "dist" << SSSP[i].Dist << endl << "parent" << SSSP[i].Parent << endl;
 	}*/
-	cout << "*******success*******" << endl;
 	//Test code end
 
 

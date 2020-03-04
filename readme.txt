@@ -1,6 +1,9 @@
-****Input Files****
-You need to supply changeEdges.txt, fullGraph.txt and SSSP.txt files as input. The files given here are samples. Real files will contain the actual inputs folling the same format.
-keep changeEdges.txt, fullGraph.txt and SSSP.txt in the same folder where you will keep main1.cu
+****main commands to run****
+nvcc -o op main2.cu
+./op <fullgraph file name> <SSSP file name> <changeEdges file name> <no. of nodes> <no. of edges>
+
+
+
 
 
 ****How to run****
