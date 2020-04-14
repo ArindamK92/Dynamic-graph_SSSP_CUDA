@@ -1,18 +1,15 @@
 /*extern "C" {} *///it will instruct the compiler to expect C linkage for your C functions, not C++ linkage.
-#include <thrust/find.h>
-#include <thrust/device_vector.h>
-#include <thrust/count.h>
-#include <thrust/copy.h>
-#include <thrust/execution_policy.h>
-#include <thrust/device_free.h>
+//#include <thrust/find.h>
+//#include <thrust/device_vector.h>
+//#include <thrust/count.h>
+//#include <thrust/copy.h>
+//#include <thrust/execution_policy.h>
+//#include <thrust/device_free.h>
 #include <stdio.h>
-//#include "all_structures.h"
 #include "all_structure_cuda.cuh"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <iostream>
-
-
 #include<vector>
 #include <chrono> 
 
@@ -22,45 +19,16 @@
 using namespace std;
 using namespace std::chrono;
 
-__global__ void initialize(int nodes, int src, RT_Vertex* SSSP, int* stencil)
+__global__ void initialize(int nodes, int src, RT_Vertex* SSSP)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 	if (index < nodes)
 	{
-		if (index == src) { SSSP[index].Root = -1; }
+		if (index == src) { SSSP[index].Root = -1; } //try to avoid
 		else { SSSP[index].Root = index; }
 		SSSP[index].Dist = 0.0;
-		stencil[index] = index;
 	}
 }
-
-//__global__ void create_tree(Colwt2* cuda_adjlist_full_X, int start, RT_Vertex* SSSP, int src, int* d_affectedPointer, int numberofCudaThread)
-//{
-//	int index = threadIdx.x + blockIdx.x * blockDim.x;
-//	int number_CudaThread = numberofCudaThread;
-//	int flag = 0;
-//
-//	if (index < number_CudaThread)
-//	{
-//		/*printf("source: %d", src);*/
-//		int y = cuda_adjlist_full_X[index + start].col;
-//		/*printf("y: %d", y);*/
-//		double mywt = cuda_adjlist_full_X[index + start].wt;
-//		if (mywt == -1) { flag = 1; }//invalid edge
-//		if (SSSP[y].Root == -1) { flag = 1; }
-//		if (flag == 0)
-//		{
-//			SSSP[y].Parent = src; //mark the parent
-//			SSSP[y].EDGwt = mywt; //mark the edgewt
-//			SSSP[y].Root = SSSP[src].Root;
-//			SSSP[y].Dist = SSSP[src].Dist + mywt;
-//			d_affectedPointer[y] = 1;
-//		}
-//		/*printf("end if***");*/
-//
-//	}
-//
-//}
 
 __global__ void create_tree2(Colwt2* cuda_adjlist_full_X, int* d_colStartPtr_X, RT_Vertex* SSSP, int* d_affectedPointer, int* change_d, int nodes)
 {
@@ -69,19 +37,14 @@ __global__ void create_tree2(Colwt2* cuda_adjlist_full_X, int* d_colStartPtr_X, 
 	
 	if (index < nodes && d_affectedPointer[index] == 1)
 	{
-		/*printf("index: %d", index);
-		printf("affected ptr value: %d", d_affectedPointer[index]);*/
+		
 		int adjNodestartIndex = d_colStartPtr_X[index];
-		/*printf("y: %d", y);*/
 		for (int k = 0; k < d_colStartPtr_X[index + 1] - d_colStartPtr_X[index]; k++)
 		{
 			flag = 0;
 			int y = cuda_adjlist_full_X[adjNodestartIndex + k].col;
 			double mywt = cuda_adjlist_full_X[adjNodestartIndex + k].wt;
-			/*printf("y: %d", y);*/
-			/*printf("SSSP[y].Root:%d,SSSP[y].Parent:%d, SSSP[y].Root:%d,SSSP[y].Dist:%f", SSSP[y].Root, SSSP[y].Parent, SSSP[y].Root, SSSP[y].Dist);*/
 			if (mywt == -1) {
-				/*printf("check 1.1");*/
 				flag = 1; }//invalid edge
 			if (SSSP[y].Root == -1) { /*printf("check 1.2");*/ flag = 1; }
 			if (SSSP[y].Root != y) { /*printf("check 1.3");*/ flag = 1; }
@@ -97,10 +60,7 @@ __global__ void create_tree2(Colwt2* cuda_adjlist_full_X, int* d_colStartPtr_X, 
 		}
 		d_affectedPointer[index] = 0;
 		change_d[0] = 1;
-		/*printf("end if***");*/
-
 	}
-
 }
 
 struct is_affected
@@ -188,7 +148,6 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 					node2 = node_1;
 				}
 
-				//  printf("%d:%f:::%d::%f:::%f \n", node1, UpdatedDist[node1],node2, UpdatedDist[node2], mye.edge_wt);
 		  //Check whether node1 is relaxed
 				if (d_UpdatedDist[node2] > d_UpdatedDist[node1] + edge_weight)
 				{
@@ -197,7 +156,6 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 					SSSP[node2].EDGwt = edge_weight;
 					d_UpdatedDist[node2] = d_UpdatedDist[node1] + edge_weight;
 					SSSP[node2].Update = true;
-					/*printf("@@@@node: %d, parent: %d, dist: %f", node2, SSSP[node2].Parent, d_UpdatedDist[node2]);*/
 					//Mark Edge to be added--node1 updated
 					Edgedone[index] = 1;
 					break;
@@ -215,27 +173,21 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 			//Check if edge exists in the tree
 				//this will happen if node1 is parentof node or vice-versa
 			bool iskeyedge = false;
-
-			// printf("XXX:%d:%d \n",mye.node1, mye.node2 );
-
-					 //Mark edge as deleted
+			 //Mark edge as deleted
 			if (SSSP[node_1].Parent == node_2)
 			{
 				//printf("YYY:%d:%d \n",mye.node1, mye.node2 );
 				SSSP[node_1].EDGwt = inf;
 				SSSP[node_1].Update = true;
 				iskeyedge = true;
-				/*d_UpdatedDist[node_1] = inf;*/ //check. added recently 01-15-20
 			}
 			else {
 				//Mark edge as deleted
 				if (SSSP[node_2].Parent == node_1)
 				{
-					// printf("ZZZ:%d:%d \n",mye.node1, mye.node2 );
 					SSSP[node_2].EDGwt = inf;
 					SSSP[node_2].Update = true;
 					iskeyedge = true;
-					/*d_UpdatedDist[node_2] = inf;*/ //check. added recently 01-15-20
 				}
 			}
 
@@ -247,8 +199,6 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 
 				for (int k = 0; k < d_colStartPtr_X[node_1 + 1] - d_colStartPtr_X[node_1]; k++)
 				{
-					////TEPS:
-					//*te = *te + 1;
 					int myn = cuda_adjlist_full_X[d_colStartPtr_X[node_1] + k].col;
 					if (myn == node_2)
 					{
@@ -260,8 +210,6 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 
 				for (int k = 0; k < d_colStartPtr_X[node_2 + 1] - d_colStartPtr_X[node_2]; k++)
 				{
-					////TEPS:
-					//*te = *te + 1;
 					int myn = cuda_adjlist_full_X[d_colStartPtr_X[node_2] + k].col;
 					if (myn == node_1)
 					{
@@ -270,11 +218,7 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 					}
 
 				}
-			}//end of if
-
-
-			/*else      // check. recently added 24-01-2020. The below part is required for all as we consider full graph
-			{*/
+			}
 
 			for (int k = 0; k < colStartPtr_R[node_1 + 1] - colStartPtr_R[node_1]; k++)
 			{
@@ -285,7 +229,7 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 					break;
 				}
 
-			}//end of for
+			}
 
 			for (int k = 0; k < colStartPtr_R[node_2 + 1] - colStartPtr_R[node_2]; k++)
 			{
@@ -296,15 +240,14 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 					break;
 				}
 
-			}//end of for
-
-		//}//end of if
-
-		}//end of else if deleted
+			}
+		}
 	}
 }
 
-
+//The insertDeleteEdge method might connect wrong edge depending on the sequence when the edge was connected (mainly because of the synchronization related fault)
+//We avoid this error by the below method without using locking approach
+//The below method tries to fit the edges using relaxation step and if it can fit, a flag is raised. 
 __global__ void checkInsertedEdges(int numS, int* Edgedone, double* d_UpdatedDist, xEdge_cuda* allChange_cuda, RT_Vertex* SSSP, int* change_d)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -334,6 +277,7 @@ __global__ void checkInsertedEdges(int numS, int* Edgedone, double* d_UpdatedDis
 				node2 = node_1;
 			}
 
+			//***Below two if logic will connect the correct edges.***
 			//Check if some other edge was added--mark edge to be added //check x
 			if (d_UpdatedDist[node1] > d_UpdatedDist[node2] + edgeWeight)
 			{
@@ -354,14 +298,14 @@ __global__ void checkInsertedEdges(int numS, int* Edgedone, double* d_UpdatedDis
 				SSSP[node1].EDGwt = edgeWeight;
 				d_UpdatedDist[node1] = d_UpdatedDist[SSSP[node1].Parent] + SSSP[node1].EDGwt;
 				SSSP[node2].Update = true;
-				change_d[0] = 1;
+				change_d[0] = 1; //every time node dist is updated, the flag becomes 1
 			}
-
-
-		}//end of if
+		}
 	}
 }
 
+//In the previous steps we do not update dist in SSSP structure, we update it in d_UpdatedDist structure in case of insertion.
+//In the below method we update dist in SSSP structure
 __global__ void updateDistance(int X_size, RT_Vertex* SSSP, double* d_UpdatedDist, double inf)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -390,26 +334,26 @@ __global__ void updateDistance(int X_size, RT_Vertex* SSSP, double* d_UpdatedDis
 		if (flag != 1 && SSSP[index].Dist > d_UpdatedDist[index])
 		{
 			SSSP[index].Dist = d_UpdatedDist[index];
-			/*printf("In updateDistance:  index: %d, dist:%f\n", index, SSSP[index].Dist);*/
 			SSSP[index].Update = true;
 		}
 
 	}
 }
-
+//In case of deletion we did not update distance in d_UpdatedDist till now.
+//In the below method we update it
 __global__ void initializeUpdatedDistOldDist(double* d_UpdatedDist, double* d_OldUpdate, RT_Vertex* SSSP, int X_size)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
 	if (index < X_size)
 	{
-		d_UpdatedDist[index] = SSSP[index].Dist; //this will fill up the d_UpdatedDist values for deletion case also
-		d_OldUpdate[index] = SSSP[index].Dist;
-		/*printf("****Inside initializeUpdatedDistOldDist: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);*/
+		d_UpdatedDist[index] = SSSP[index].Dist; //**this will fill up the d_UpdatedDist values for deletion case also
+		d_OldUpdate[index] = SSSP[index].Dist; //check if not need, we can omit it
 	}
 }
 
 
-//revised function //check. recently added function. 24-01-2020
+//1. This method tries to connect the disconnected nodes(disconnected by deletion) with other nodes using the original graph
+//2. This method propagates the dist update till the leaf nodes
 __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_size, /*int* d_mychange,*/ int* d_colStartPtr_X, Colwt2* cuda_adjlist_full_X, double inf, int* change_d, int its, Colwt2* cuda_adjlist_full_R, int* colStartPtr_R)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -433,26 +377,21 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 				if (mywt < 0) { continue; } //if mywt = -1, that means node was deleted
 				if (SSSP[index].Dist == inf)
 				{
-					/*printf("$$$$: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-					printf("$$$$myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
-					*/
-					if (myn == SSSP[index].Parent)
+					if (myn == SSSP[index].Parent) //we don't update if myn is parent node
 					{
 						continue;
 					}
-					if (SSSP[myn].Parent == index)
+					if (SSSP[myn].Parent == index) //if myn is not parent, then update dist to inf
 					{
 						d_UpdatedDist[myn] = inf;
 						SSSP[myn].Dist = inf;
 						SSSP[myn].Update = true;
 						change_d[0] = 1;
-						/*printf("&&&&index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-						printf("&&&&myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
-						*/
 						continue;
 					}
 					else {
-						if (SSSP[myn].Dist != inf)
+						//below part connects disconnected(by deletion) nodes to other connected nodes
+						if (SSSP[myn].Dist != inf) //if myn is from different branch, connect it with index when index.dist was inf
 						{
 							d_UpdatedDist[index] = d_UpdatedDist[myn] + mywt;
 							SSSP[index].Dist = d_UpdatedDist[myn] + mywt;
@@ -460,19 +399,13 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 							SSSP[index].EDGwt = mywt;
 							SSSP[index].Update = true;
 							change_d[0] = 1;
-							/*printf("++++index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-							printf("++++myn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);*/
-
 							continue;
 						}
 					}
 				}
 				if (SSSP[index].Dist != inf)
 				{
-					/*printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-					printf("Not infmyn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
-					*/
-					if (SSSP[myn].Dist == inf)
+					if (SSSP[myn].Dist == inf) //when myn is disconnected by a deletion, this code tries to connect it with other nodes
 					{
 						if (SSSP[index].Parent != myn)
 						{
@@ -492,18 +425,11 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 					}
 					if (d_UpdatedDist[myn] > d_UpdatedDist[index] + mywt) //update both cases where parent of myn == index or parent of myn != index
 					{
-						//if (SSSP[myn].EDGwt < mywt && SSSP[myn].Parent == index) //check if we have taken an edge with lower weight from the changeEdge set. if yes then don't update edgeweight
-						//{
-						//	mywt = SSSP[myn].EDGwt;
-						//}
 						d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
 						SSSP[myn].Dist = d_UpdatedDist[index] + mywt;
 						SSSP[myn].Update = true;
 						SSSP[myn].Parent = index;
 						change_d[0] = 1;
-						/*printf("Not inf: index: %d edge weight: %f parent: %d dist: %f\n", index, SSSP[index].EDGwt, SSSP[index].Parent, SSSP[index].Dist);
-						printf("Not infmyn: %d myn weight: %f parent: %d dist: %f\n", myn, mywt, SSSP[myn].Parent, SSSP[myn].Dist);
-						*/
 						continue;
 					}
 					else
@@ -513,7 +439,6 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 							d_UpdatedDist[myn] = d_UpdatedDist[index] + mywt;
 							SSSP[myn].Dist = d_UpdatedDist[index] + mywt;
 							SSSP[myn].Update = true;
-							/*SSSP[myn].Parent = index;*/ //Parent will remain same
 							change_d[0] = 1;
 							continue;
 						}
@@ -532,6 +457,7 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 	}
 }
 
+//doublecheck if update flag should be raised. Might be omitted.
 __global__ void checkIfDistUpdated(int X_size, double* d_OldUpdate, double* d_UpdatedDist, RT_Vertex* SSSP)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -573,7 +499,6 @@ __global__ void updateDistanceFinal(int X_size, double* d_UpdatedDist, RT_Vertex
 			else
 			{
 				SSSP[index].Dist = d_UpdatedDist[SSSP[index].Parent] + SSSP[index].EDGwt;
-				//printf("Check 2. index: %d dist: %f, parent dist:%f, edgewt: %f \n", index, SSSP[index].Dist, d_UpdatedDist[SSSP[index].Parent], SSSP[index].EDGwt); //Test 23-01-2020
 			}
 		}
 	}
@@ -589,24 +514,18 @@ void rest_update(int* X_size, Colwt2* cuda_adjlist_full_X, int* colStartPtr_X, R
 3rd arg: change edges file name
 4th arg: no. of nodes
 5th arg: no. of edges
+****main commands to run****
+nvcc -o op main2.cu
+./op <fullgraph file name> <SSSP file name> <changeEdges file name> <no. of nodes> <no. of edges * 2 (or total number of lines in fullgraph file)>
 */
 int main(int argc, char* argv[]) {
 
-	double startx, endx, starty, endy;
-	/*double inf = std::numeric_limits<double>::infinity();*/
 
 	/***** Preprocessing to Graph (GUI) ***********/
 	int nodes, edges;
 	cudaError_t cudaStatus;
-
-	/*printf("Enter number of total nodes: ");
-	scanf("%d", &nodes);
-	printf("Enter number of total edges: ");
-	scanf("%d", &edges);
-	printf("check 0");*/
-
-	nodes = atoi(argv[4]); //when cmd line arg used
-	edges = atoi(argv[5]); //when cmd line arg used
+	nodes = atoi(argv[4]); 
+	edges = atoi(argv[5]); 
 
 
 	/*** Read Full Graph ***/
@@ -615,46 +534,16 @@ int main(int argc, char* argv[]) {
 	cudaStatus = cudaMallocManaged((void**)&colStartPtr_R, (nodes + 1) * sizeof(int)); //we take nodes +1 to store the start ptr of the first row 
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed!");
-		/*goto Error;*/
 	}
 	int total_adjmatrix_size_R = edges * 2; //e.g.= (0 1 wt1), (1 0 wt1) both are same edge, but both will be there
 	Colwt2* cuda_adjlist_full_R;
 	cudaStatus = cudaMallocManaged(&cuda_adjlist_full_R, total_adjmatrix_size_R * sizeof(Colwt2));
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed!");
-		/*goto Error;*/
 	}
-	printf("check 1");
 
-	//use below for direct path
-	/*string file1 = "C:\\Users\\khand\\Desktop\\PhD\\CUDA test\\Test\\test 1\\fullGraph.txt";
-	char* cstr1 = &file1[0];
-	readin_graphU(&R, nodes, cstr1);*/
-
-	//use below code if we use pass file name as argument
-	//readin_graphU(&R, nodes, argv[1]);
-
-
-	//use below code to pass the file name as relative path.
-	//**keep the files in the same folder
-	//string file1 = "./fullGraph.txt";
-	//char* cstr1 = &file1[0];
-	//readin_graphU4(colStartPtr_R, cuda_adjlist_full_R, cstr1, &nodes); //when local file used
-
-	readin_graphU4(colStartPtr_R, cuda_adjlist_full_R, argv[1], &nodes); //when cmd line arg used
-
-	cout << "success 2" << endl;
-	/*for (int i = 0; i < nodes + 1; i++)
-	{
-		cout <<"*******Row start ptr: "<< colStartPtr_R[i] << endl;
-			for (int y = colStartPtr_R[i]; y< colStartPtr_R[i+1];y++)
-			{
-				cout <<"node: "<< cuda_adjlist_full_R[y].col <<"weight: "<< cuda_adjlist_full_R[y].wt << endl;
-			}
-	}*/
-
-	/*** Finished Reading Full graph **/
-
+	readin_graphU4(colStartPtr_R, cuda_adjlist_full_R, argv[1], &nodes);
+	
 	/*** Read the input SSSP ***/
 	int* colStartPtr_X = (int*)malloc((nodes + 1) * sizeof(int));//we take nodes +1 to store the start ptr of the first row 
 	int total_adjmatrix_size_X = (nodes - 1) * 2; //maximum number of edges in SSSP tree = nodes - 1. Each edge will take 2 places in adjacent list
@@ -662,50 +551,20 @@ int main(int argc, char* argv[]) {
 	cudaStatus = cudaMallocManaged(&cuda_adjlist_full_X, total_adjmatrix_size_X * sizeof(Colwt2));
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed at SSSP file");
-		/*goto Error;*/
 	}
-	cout << "success 3" << endl;
 
-	//use below code to pass the file name as relative path.
-	//**keep the files in the same folder
-	//string file2 = "./SSSP.txt";
-	//char* cstr2 = &file2[0];
-	//readin_graphU4(colStartPtr_X, cuda_adjlist_full_X, cstr2, &nodes); //when local SSSP file used
-
-	//when cmd line arg used
 	readin_graphU4(colStartPtr_X, cuda_adjlist_full_X, argv[2], &nodes); //when cmd line arg used
-	cout << "success 4" << endl;
-	/*** Finished Reading input SSSP **/
 
 	/*** Read the change file ***/
-	//There will be a list for inserts and a list for delete
 	vector<xEdge> allChange;
 	allChange.clear();
+	readin_changes(argv[3], &allChange);
 
-	/*** Read set of Changed Edges ***/
-   //use below for direct path
-   /*string file3 = "C:\\Users\\khand\\Desktop\\PhD\\CUDA test\\Test\\test 1\\changeEdges.txt";
-   char* cstr3 = &file3[0];
-   readin_changes(cstr3, &allChange);*/
-
-   //use below code if we use pass file name as argument
-   /*readin_changes(argv[3], &allChange);*/
-
-   //use below code to pass the file name as relative path.
-	/*string file3 = "./changeEdges.txt";
-	char* cstr3 = &file3[0];
-	readin_changes(cstr3, &allChange);*/
-
-	readin_changes(argv[3], &allChange); //when cmd line arg used
-
-	cout << "success 5" << endl;
-	//new addition
 	xEdge_cuda* allChange_cuda;
 	int totalChange = allChange.size();
 	cudaStatus = cudaMallocManaged(&allChange_cuda, totalChange * sizeof(xEdge_cuda));
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed at changeEdge");
-		/*goto Error;*/
 	}
 	for (int i = 0; i < totalChange; i++)
 	{
@@ -714,146 +573,91 @@ int main(int argc, char* argv[]) {
 		allChange_cuda[i].edge_wt = allChange.at(i).theEdge.edge_wt;
 		allChange_cuda[i].inst = allChange.at(i).inst;
 	}
-	/*** Finished Reading Changed Edges **/
 
 	//Initializing  Rooted Tree
 	RT_Vertex* SSSP;
 	cudaStatus = cudaMallocManaged(&SSSP, nodes * sizeof(RT_Vertex));
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed at SSSP structure");
-		/*goto Error;*/
 	}
-	int* stencil; //stencil is used for tracking which node is being affected. 
-	/*cudaMallocManaged(&stencil, nodes * sizeof(int));*/
-	cudaStatus = cudaMalloc((void**)&stencil, nodes * sizeof(int));
+	
+	int src = 0; //the source from which the paths are computed. Default we have taken 0 as source node
+	initialize << <(nodes / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (nodes, src, SSSP); //kernet call
+	cudaDeviceSynchronize();
+
+	//Code for create_tree from input SSSP
+	auto startTime = high_resolution_clock::now(); //Time calculation
+	int* affectedPointer;
+	int* d_affectedPointer;
+	cudaStatus = cudaMalloc((void**)&d_affectedPointer, nodes * sizeof(int));
 	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaMalloc failed at SSSP stencil");
-		/*goto Error;*/
+		fprintf(stderr, "cudaMalloc failed at affectedPointer");
 	}
-	/*int* stencil_c = new int[nodes];*/
-	int* stencil_c = (int*)calloc(nodes, sizeof(int));
-	/*vector<SCC_vertex>SCC;*/
-	int graphDirectedUndirectedIndicator = 0; // Should be 1 for SCC, 0 for not SCC. need to modify if we want SCC
-
-	int source;
-	/*printf("Enter source node: ");
-	scanf("%d", &source);*/
-	source = 0; //default we have taken 0 as source node
-
-	int p;
-
-
-
-	if (graphDirectedUndirectedIndicator == 0) {
-		int src = source; //the source from which the paths are computed
-		initialize << <(nodes / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (nodes, src, SSSP, stencil); //kernet call
-		cudaDeviceSynchronize();
-		cudaMemcpy(stencil_c, stencil, nodes * sizeof(int), cudaMemcpyDeviceToHost);
-		/*for (int i = 0; i < nodes; i++)
-		{
-			cout << "stencil_c" << stencil_c[i] << endl;
-		}*/
-		/*for (int i = 0; i < nodes; i++)
-		{
-
-			cout <<"dist"<< SSSP->Dist << endl;
-			cout <<"wt"<< SSSP->EDGwt << endl;
-			cout << "level"<< SSSP->Root << endl;
-			cout << "marked"<< SSSP->Parent << endl;
-		}*/
-
-
-		//Code for create_tree:
-		//Time calculation
-		auto startTime = high_resolution_clock::now();
-		int totalAffectedNode; //alias of numberOfAffectedNode
-
-		int* affectedPointer;
-		int* d_affectedPointer;
-		cudaStatus = cudaMalloc((void**)&d_affectedPointer, nodes * sizeof(int));
-		if (cudaStatus != cudaSuccess) {
-			fprintf(stderr, "cudaMalloc failed at affectedPointer");
-			/*goto Error;*/
-		}
-		affectedPointer = (int*)calloc(nodes, sizeof(int));
-		affectedPointer[0] = 1;
-		cudaMemcpy(d_affectedPointer, affectedPointer, nodes * sizeof(int), cudaMemcpyHostToDevice);
-		/*cudaMallocManaged(&affectedPointer, nodes * sizeof(int));*/
-
-		//new addition
-		int* change_d = new int[1];
-		int* change = new int[1];
-		change[0] = 1;
-		cudaMalloc((void**)&change_d, 1 * sizeof(int));
-		int* d_colStartPtr_X;
-		cudaMalloc((void**)&d_colStartPtr_X, (nodes + 1) * sizeof(int));
-		cudaMemcpy(d_colStartPtr_X, colStartPtr_X, (nodes + 1) * sizeof(int), cudaMemcpyHostToDevice);
-		while (change[0] == 1)
-		{
-			change[0] = 0;
-			cudaMemcpy(change_d, change, 1 * sizeof(int), cudaMemcpyHostToDevice);
-			create_tree2 << <(nodes / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>> > (cuda_adjlist_full_X, d_colStartPtr_X, SSSP, d_affectedPointer, change_d, nodes);
-			cudaDeviceSynchronize();
-			cudaMemcpy(change, change_d, 1 * sizeof(int), cudaMemcpyDeviceToHost);
-			/*cout << "change"<< change[0]<<endl;*/
-
-		}
-
-		free(affectedPointer);
-		/*free(affected_nodes);*/
-		cudaFree(d_affectedPointer);
-		cudaFree(d_colStartPtr_X);
-
-		//Time calculation
-		auto stopTime = high_resolution_clock::now();
-		// Time calculation
-		auto duration = duration_cast<microseconds>(stopTime - startTime);
-		cout << "Time taken by create-tree function: "
-			<< duration.count() << " microseconds" << endl;
-
-		//test
-		/*cout << "input sssp tree" << endl;
-		for (int i = 0; i < nodes; i++)
-		{
-			cout << "node" << i << endl;
-			cout << "dist" << SSSP[i].Dist << endl;
-			cout << "parent" << SSSP[i].Parent << endl;
-			cout << "parent" << SSSP[i].EDGwt << endl;
-		}*/
-		//test end
-		//edge_update function
-		//Update the inserted and delted edges in the tree
-		int x_size = nodes;
-		int SSSP_size = nodes; //considering all nodes are participating in the SSSP
-		int te = 0;
-		auto startTime1 = high_resolution_clock::now();
-		edge_update(&totalChange, &x_size, &SSSP_size, allChange_cuda, cuda_adjlist_full_X, colStartPtr_X, SSSP, cuda_adjlist_full_R, colStartPtr_R, &te, &nodes);
-		cout << "after edge_update fn" << endl;
-		//Time calculation
-		auto stopTime1 = high_resolution_clock::now();
-		// Time calculation
-		auto duration1 = duration_cast<microseconds>(stopTime1 - startTime1);
-		cout << "Time taken by edge_update function: "
-			<< duration1.count() << " microseconds" << endl;
-
-		auto startTime2 = high_resolution_clock::now();
-		rest_update(&x_size, cuda_adjlist_full_X, colStartPtr_X, SSSP, cuda_adjlist_full_R, colStartPtr_R, &nodes);
-		cout << "after rest_update fn" << endl;
-		//Time calculation
-		auto stopTime2 = high_resolution_clock::now();
-		// Time calculation
-		auto duration2 = duration_cast<microseconds>(stopTime2 - startTime2);
-		cout << "Time taken by rest_update function: "
-			<< duration2.count() << " microseconds" << endl;
-	}
-	else
+	affectedPointer = (int*)calloc(nodes, sizeof(int));
+	affectedPointer[0] = 1;
+	cudaMemcpy(d_affectedPointer, affectedPointer, nodes * sizeof(int), cudaMemcpyHostToDevice);
+	int* change_d = new int[1];
+	int* change = new int[1];
+	change[0] = 1;
+	cudaMalloc((void**)&change_d, 1 * sizeof(int));
+	int* d_colStartPtr_X;
+	cudaMalloc((void**)&d_colStartPtr_X, (nodes + 1) * sizeof(int));
+	cudaMemcpy(d_colStartPtr_X, colStartPtr_X, (nodes + 1) * sizeof(int), cudaMemcpyHostToDevice);
+	
+	while (change[0] == 1)
 	{
-		//****below code needs modification
-		/*SCC.clear();
-		readin_SCC(argv[2], &SCC);
-		update_SCC(&X, &SCC, &allChange);
-		print_network(X);*/
+		change[0] = 0;
+		cudaMemcpy(change_d, change, 1 * sizeof(int), cudaMemcpyHostToDevice);
+		create_tree2 << <(nodes / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>> > (cuda_adjlist_full_X, d_colStartPtr_X, SSSP, d_affectedPointer, change_d, nodes);
+		cudaDeviceSynchronize();
+		cudaMemcpy(change, change_d, 1 * sizeof(int), cudaMemcpyDeviceToHost);
+
 	}
+
+	free(affectedPointer);
+	cudaFree(d_affectedPointer);
+	cudaFree(d_colStartPtr_X);
+	auto stopTime = high_resolution_clock::now();//Time calculation
+	auto duration = duration_cast<microseconds>(stopTime - startTime);// Time calculation
+	cout << "Time taken by create-tree function: "
+		<< duration.count() << " microseconds" << endl;
+
+	//test
+	/*cout << "input sssp tree" << endl;
+	for (int i = 0; i < nodes; i++)
+	{
+		cout << "node" << i << endl;
+		cout << "dist" << SSSP[i].Dist << endl;
+		cout << "parent" << SSSP[i].Parent << endl;
+		cout << "Edgewt" << SSSP[i].EDGwt << endl;
+	}*/
+	//test end
+
+	//edge_update function
+	//Update the inserted and delted edges in the tree
+	int x_size = nodes;
+	int SSSP_size = nodes; //considering all nodes are participating in the SSSP
+	int te = 0;
+	auto startTime1 = high_resolution_clock::now();
+	edge_update(&totalChange, &x_size, &SSSP_size, allChange_cuda, cuda_adjlist_full_X, colStartPtr_X, SSSP, cuda_adjlist_full_R, colStartPtr_R, &te, &nodes);
+	cout << "after edge_update fn" << endl;
+	//Time calculation
+	auto stopTime1 = high_resolution_clock::now();
+	// Time calculation
+	auto duration1 = duration_cast<microseconds>(stopTime1 - startTime1);
+	cout << "Time taken by edge_update function: "
+		<< duration1.count() << " microseconds" << endl;
+
+	auto startTime2 = high_resolution_clock::now();
+	rest_update(&x_size, cuda_adjlist_full_X, colStartPtr_X, SSSP, cuda_adjlist_full_R, colStartPtr_R, &nodes);
+	cout << "after rest_update fn" << endl;
+	//Time calculation
+	auto stopTime2 = high_resolution_clock::now();
+	// Time calculation
+	auto duration2 = duration_cast<microseconds>(stopTime2 - startTime2);
+	cout << "Time taken by rest_update function: "
+		<< duration2.count() << " microseconds" << endl;
+	
 	//Test code start
 	/*cout << "SSSP" << endl;
 	for (int i = 0; i < nodes; i++)
@@ -862,11 +666,7 @@ int main(int argc, char* argv[]) {
 		cout << "node" << i << endl << "dist" << SSSP[i].Dist << endl << "parent" << SSSP[i].Parent << endl;
 	}
 	cout << "*******success*******" << endl;*/
-	/*for (int i = 262140; i < 262144; i++)
-	{
-		cout << "*******" << endl;
-		cout << "node" << i << endl << "dist" << SSSP[i].Dist << endl << "parent" << SSSP[i].Parent << endl;
-	}*/
+	
 	//Test code end
 
 
@@ -876,9 +676,6 @@ int main(int argc, char* argv[]) {
 	cudaFree(cuda_adjlist_full_X);
 	cudaFree(allChange_cuda);
 	cudaFree(SSSP);
-	cudaFree(stencil);
-Error:
-	cudaFree(colStartPtr_R);
 	return 0;
 }
 
@@ -890,18 +687,12 @@ void edge_update(int* totalChange, int* X_size, int* SSSP_size, xEdge_cuda* allC
 	/*int* Edgedone;*/
 	double* UpdatedDist;
 
-	int iter = 0;
-
 	//Mark how the edge is processed
 	int* Edgedone;
 	cudaMalloc((void**)&Edgedone, (*totalChange) * sizeof(int));
 	//initialize Edgedone array with -1
 	initializeEdgedone << <((*totalChange) / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (Edgedone, *totalChange);
 	cudaDeviceSynchronize();
-
-	/*thrust::device_vector<int> Edgedone_ptr(*totalChange);
-	thrust::fill(Edgedone_ptr.begin(), Edgedone_ptr.end(), -1);
-	int* Edgedone = thrust::raw_pointer_cast(Edgedone_ptr);*/
 
 	//Store the updated distance value
 	UpdatedDist = (double*)calloc(*X_size, sizeof(double));
@@ -912,8 +703,7 @@ void edge_update(int* totalChange, int* X_size, int* SSSP_size, xEdge_cuda* allC
 	//Initialize with current distance for each node
 	initializeUpdatedDist << <((*X_size) / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (d_UpdatedDist, SSSP, *X_size);
 	cudaDeviceSynchronize();
-	/*	cudaMemcpy(UpdatedDist, d_UpdatedDist, (*X_size) * sizeof(double), cudaMemcpyDeviceToHost);*/ //not required
-
+	
 
 	int numS = *totalChange;
 	int* d_colStartPtr_X;
@@ -924,17 +714,11 @@ void edge_update(int* totalChange, int* X_size, int* SSSP_size, xEdge_cuda* allC
 	cudaDeviceSynchronize();
 
 
-	/*int* Edgedone_c = new int[*totalChange];
-	cudaMemcpy(Edgedone_c, Edgedone, *totalChange * sizeof(int), cudaMemcpyDeviceToHost); *///not req.
-	/*cudaMemcpy(UpdatedDist, d_UpdatedDist, (*X_size) * sizeof(double), cudaMemcpyDeviceToHost); *///not req.
-
-
-	//Go over the inserted edges to see if they need to be changed
+	//Go over the inserted edges to see if they need to be changed. Correct edges are connected in this stage
 	int* change_d = new int[1];
 	int* change = new int[1];
 	change[0] = 1;
 	cudaMalloc((void**)&change_d, 1 * sizeof(int));
-	/*cudaMemcpy(change_d, change, 1 * sizeof(int), cudaMemcpyHostToDevice);*/ //recent change
 	while (change[0] == 1)
 	{
 		change[0] = 0;
@@ -942,7 +726,6 @@ void edge_update(int* totalChange, int* X_size, int* SSSP_size, xEdge_cuda* allC
 		checkInsertedEdges << < (numS / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (numS, Edgedone, d_UpdatedDist, allChange_cuda, SSSP, change_d);
 		cudaDeviceSynchronize();
 		cudaMemcpy(change, change_d, 1 * sizeof(int), cudaMemcpyDeviceToHost);
-		/*cout << "change"<< change[0]<<endl;*/
 
 	}
 
@@ -950,7 +733,6 @@ void edge_update(int* totalChange, int* X_size, int* SSSP_size, xEdge_cuda* allC
 	 //Initialize with current distance for each node
 	updateDistance << < (numS / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (*X_size, SSSP, d_UpdatedDist, inf);
 	cudaDeviceSynchronize();
-
 
 	cudaFree(change_d);
 	cudaFree(d_UpdatedDist);
@@ -988,25 +770,15 @@ void rest_update(int* X_size, Colwt2* cuda_adjlist_full_X, int* colStartPtr_X, R
 	cudaMalloc((void**)&d_OldUpdate, (*X_size) * sizeof(double));
 	cudaMemcpy(d_OldUpdate, OldUpdate, (*X_size) * sizeof(double), cudaMemcpyHostToDevice);
 
-
-	//int* mychange;
-	////Store the old updated distance value
-	//mychange = (int*)calloc(*X_size, sizeof(int));
-	//int* d_mychange;
-	//cudaMalloc((void**)&d_mychange, (*X_size) * sizeof(int));
-	//cudaMemcpy(d_mychange, mychange, (*X_size) * sizeof(int), cudaMemcpyHostToDevice);
-
 	int* d_colStartPtr_X;
 	cudaMalloc((void**)&d_colStartPtr_X, (*nodes + 1) * sizeof(int));
 	cudaMemcpy(d_colStartPtr_X, colStartPtr_X, (*nodes + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
 
-	//Initialize with current distance for each node
+	//Initialize with current distance for each node. mainly d_UpdatedDist is updated where deletion done
 	initializeUpdatedDistOldDist << <((*X_size) / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (d_UpdatedDist, d_OldUpdate, SSSP, *X_size);
 	cudaDeviceSynchronize();
 
-
-	int iter = 0;
 	while (change[0] == 1 && its < 70)
 	{
 		printf("Iteration:%d \n", its);
@@ -1017,16 +789,8 @@ void rest_update(int* X_size, Colwt2* cuda_adjlist_full_X, int* colStartPtr_X, R
 		cudaDeviceSynchronize();
 		cudaMemcpy(change, change_d, 1 * sizeof(int), cudaMemcpyDeviceToHost);
 
-		//Test code start
-		/*cudaMemcpy(UpdatedDist, d_UpdatedDist, (*X_size) * sizeof(double), cudaMemcpyDeviceToHost);
-		for (int i = 0; i < *X_size; i++)
-		{
-			cout << "UpdatedDist: " << UpdatedDist[i] << endl;
-		}*/
-		//Test code end
-
-
 	//Check if distance was updated
+		//checkIfDistUpdated may not be required. Omit if not needed
 		checkIfDistUpdated << <((*X_size) / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (*X_size, d_OldUpdate, d_UpdatedDist, SSSP);
 		cudaDeviceSynchronize();
 		its++;
@@ -1038,16 +802,12 @@ void rest_update(int* X_size, Colwt2* cuda_adjlist_full_X, int* colStartPtr_X, R
 	updateDistanceFinal << <((*X_size) / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK >> > (*X_size, d_UpdatedDist, SSSP, inf);
 	cudaDeviceSynchronize();
 
-
 	free(UpdatedDist);
 	free(OldUpdate);
-	/*free(mychange);*/
 	cudaFree(change_d);
 	cudaFree(d_UpdatedDist);
 	cudaFree(d_OldUpdate);
-	/*cudaFree(d_mychange);*/
 	cudaFree(d_colStartPtr_X);
-
 	return;
 }
 
