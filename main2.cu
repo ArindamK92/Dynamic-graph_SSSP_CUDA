@@ -30,6 +30,7 @@ __global__ void initialize(int nodes, int src, RT_Vertex* SSSP)
 	}
 }
 
+//change the name of the fn
 __global__ void create_tree2(Colwt2* cuda_adjlist_full_X, int* d_colStartPtr_X, RT_Vertex* SSSP, int* d_affectedPointer, int* change_d, int nodes)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -109,14 +110,14 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 			Edgedone[index] = 0; //mark to not add
 		}
 
-		if (allChange_cuda[index].inst == 1)  //check x
+		if (allChange_cuda[index].inst == 1)  //for Insertion inst should be 1
 		{
-			//Check if edge exists--then dont insert 
+			//Check if edge with smaller edge weight exists--then dont insert 
 			for (int k = 0; k < d_colStartPtr_X[node_1 + 1] - d_colStartPtr_X[node_1]; k++)
 			{
 				int myn = cuda_adjlist_full_X[d_colStartPtr_X[node_1] + k].col;
 				double mywt = cuda_adjlist_full_X[d_colStartPtr_X[node_1] + k].wt; //check. added recently 01-15-20
-				//****need check
+				
 				if (myn == node_2 && mywt <= edge_weight && mywt != -1)
 				{
 					Edgedone[index] = 0;
@@ -134,6 +135,7 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 				//Default is remainder edge
 			Edgedone[index] = 2;
 			//Check twice once for  n1->n2 and once for n2->n1
+			//****for directed graph, we don't need this
 			for (int yy = 0; yy < 2; yy++)
 			{
 				int node1, node2;
@@ -171,18 +173,20 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 		{
 			Edgedone[index] = 3;
 			//Check if edge exists in the tree
-				//this will happen if node1 is parentof node or vice-versa
+				
 			bool iskeyedge = false;
-			 //Mark edge as deleted
+			
+			//this will check if node1 is parent of node2 or vice-versa
 			if (SSSP[node_1].Parent == node_2)
 			{
 				//printf("YYY:%d:%d \n",mye.node1, mye.node2 );
+				//Mark edge as deleted by making edgewt = inf
 				SSSP[node_1].EDGwt = inf;
 				SSSP[node_1].Update = true;
 				iskeyedge = true;
 			}
 			else {
-				//Mark edge as deleted
+				//Mark edge as deleted by making edgewt = inf
 				if (SSSP[node_2].Parent == node_1)
 				{
 					SSSP[node_2].EDGwt = inf;
@@ -192,8 +196,8 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 			}
 
 
-			//If  Key Edge Delete from key edges
-		   //Set weights to -1;
+			//If  Key Edge is Deleteed
+		   //Set weights to -1 in input SSSP 
 			if (iskeyedge)
 			{
 
@@ -220,6 +224,7 @@ __global__ void insertDeleteEdge(xEdge_cuda* allChange_cuda, int* Edgedone, RT_V
 				}
 			}
 
+			//Set weights to -1 in original graph 
 			for (int k = 0; k < colStartPtr_R[node_1 + 1] - colStartPtr_R[node_1]; k++)
 			{
 				int myn = cuda_adjlist_full_R[colStartPtr_R[node_1] + k].col;
@@ -457,7 +462,7 @@ __global__ void updateNeighbors(double* d_UpdatedDist, RT_Vertex* SSSP, int X_si
 	}
 }
 
-//doublecheck if update flag should be raised. Might be omitted.
+//doublecheck if update flag should be raised. This method might be omitted.
 __global__ void checkIfDistUpdated(int X_size, double* d_OldUpdate, double* d_UpdatedDist, RT_Vertex* SSSP)
 {
 	int index = threadIdx.x + blockIdx.x * blockDim.x;
@@ -611,8 +616,18 @@ int main(int argc, char* argv[]) {
 		create_tree2 << <(nodes / THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>> > (cuda_adjlist_full_X, d_colStartPtr_X, SSSP, d_affectedPointer, change_d, nodes);
 		cudaDeviceSynchronize();
 		cudaMemcpy(change, change_d, 1 * sizeof(int), cudaMemcpyDeviceToHost);
+		/*cout << "*******************" << endl;
+		for (int i = 0; i < nodes; i++)
+		{
+			
+			cout << "node" << i << endl;
+			cout << "dist" << SSSP[i].Dist << endl;
+			cout << "parent" << SSSP[i].Parent << endl;
+			cout << "Edgewt" << SSSP[i].EDGwt << endl;
+		}*/
 
 	}
+
 
 	free(affectedPointer);
 	cudaFree(d_affectedPointer);
@@ -623,14 +638,14 @@ int main(int argc, char* argv[]) {
 		<< duration.count() << " microseconds" << endl;
 
 	//test
-	/*cout << "input sssp tree" << endl;
+	cout << "input sssp tree" << endl;
 	for (int i = 0; i < nodes; i++)
 	{
 		cout << "node" << i << endl;
 		cout << "dist" << SSSP[i].Dist << endl;
 		cout << "parent" << SSSP[i].Parent << endl;
 		cout << "Edgewt" << SSSP[i].EDGwt << endl;
-	}*/
+	}
 	//test end
 
 	//edge_update function
